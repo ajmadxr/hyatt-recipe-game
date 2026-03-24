@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hyatt Recipe Challenge</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.4/dist/gsap.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #07101e;
+      overflow: hidden;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #fff;
+    }
+
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* ── HUD ── */
+    #hud {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 20;
+      display: none;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 18px 28px;
+      pointer-events: none;
+    }
+
+    .hud-panel {
+      background: rgba(10, 9, 20, 0.78);
+      border: 1px solid rgba(201, 168, 76, 0.45);
+      border-radius: 6px;
+      padding: 10px 20px;
+      min-width: 110px;
+    }
+
+    .hud-label {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(201, 168, 76, 0.55);
+      margin-bottom: 2px;
+    }
+
+    .hud-value {
+      font-size: 26px;
+      font-weight: bold;
+      color: #C9A84C;
+      line-height: 1;
+    }
+
+    .hud-sub {
+      font-size: 11px;
+      color: rgba(201, 168, 76, 0.5);
+      margin-top: 3px;
+      letter-spacing: 1px;
+    }
+
+    #timer-value.urgent {
+      color: #ff4b4b;
+      animation: timer-pulse 0.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes timer-pulse {
+      from { opacity: 1; }
+      to   { opacity: 0.45; }
+    }
+
+    /* Score pop */
+    @keyframes score-pop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.28); color: #fff; }
+      100% { transform: scale(1); }
+    }
+
+    .score-pop { animation: score-pop 0.35s ease-out forwards; }
+
+    /* Streak flash when multiplier increases */
+    @keyframes streak-flash {
+      0%   { transform: scale(1);    color: #C9A84C; }
+      50%  { transform: scale(1.45); color: #fff;    text-shadow: 0 0 20px #C9A84C; }
+      100% { transform: scale(1);    color: #C9A84C; }
+    }
+
+    .streak-flash { animation: streak-flash 0.4s ease-out forwards; }
+
+    /* ── Dish display ── */
+    #dish-display {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      text-align: center;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+    }
+
+    #dish-name {
+      font-size: 30px;
+      color: #C9A84C;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 28px rgba(201, 168, 76, 0.4);
+    }
+
+    #dish-instruction {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.45);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-top: 7px;
+    }
+
+    #progress-wrap {
+      width: 320px;
+      margin: 12px auto 0;
+    }
+
+    #progress-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    #progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #B8860B, #C9A84C, #FFA500);
+      transition: width 0.35s ease;
+    }
+
+    #progress-label {
+      font-size: 10px;
+      color: rgba(201, 168, 76, 0.4);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    /* ── Feedback toast ── */
+    #feedback {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 25;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: #C9A84C;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      text-shadow: 0 0 20px currentColor;
+    }
+
+    /* ── Shared overlay base ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: all;
+    }
+
+    /* ── Title screen ── */
+    #title-screen {
+      background: radial-gradient(ellipse at 50% 60%, #0d1a2e 0%, #040a14 100%);
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      letter-spacing: 7px;
+      text-transform: uppercase;
+      color: rgba(201, 168, 76, 0.6);
+      margin-bottom: 14px;
+    }
+
+    .gold-rule {
+      width: 70px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+      margin: 18px auto;
+    }
+
+    .game-title {
+      font-size: 64px;
+      color: #fff;
+      line-height: 1.05;
+      letter-spacing: -1px;
+    }
+
+    .game-title span { color: #C9A84C; }
+
+    .game-subtitle {
+      font-size: 13px;
+      color: rgba(201, 168, 76, 0.55);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 12px;
+      margin-bottom: 48px;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1.5px solid #C9A84C;
+      color: #C9A84C;
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      padding: 15px 52px;
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+    }
+
+    .btn:hover {
+      background: #C9A84C;
+      color: #07101e;
+      box-shadow: 0 0 30px rgba(201, 168, 76, 0.35);
+    }
+
+    .dish-icons {
+      margin-top: 44px;
+      font-size: 28px;
+      letter-spacing: 14px;
+      opacity: 0.45;
+    }
+
+    .how-to-play {
+      margin-top: 30px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 1.5px;
+      line-height: 1.9;
+    }
+
+    /* ── Round end ── */
+    #round-end {
+      background: rgba(8, 8, 16, 0.88);
+      display: none;
+    }
+
+    #round-end.show { display: flex; }
+
+    .round-title {
+      font-size: 38px;
+      color: #C9A84C;
+      margin-bottom: 8px;
+    }
+
+    .round-dish-emoji { font-size: 52px; margin-bottom: 14px; }
+
+    .stat-row {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 2.2;
+      margin-bottom: 30px;
+    }
+
+    .stat-row strong { color: #C9A84C; }
+
+    /* ── Game over ── */
+    #game-over {
+      background: radial-gradient(ellipse at 50% 40%, #0d1a2e 0%, #040a14 100%);
+      display: none;
+    }
+
+    #game-over.show { display: flex; }
+
+    .final-score-num {
+      font-size: 88px;
+      color: #C9A84C;
+      font-weight: bold;
+      text-shadow: 0 0 50px rgba(201, 168, 76, 0.5);
+      line-height: 1;
+      margin: 10px 0;
+    }
+
+    .rank-badge {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.65);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    .rank-badge span { color: #C9A84C; }
+
+    /* ── Results table ── */
+    #go-results-table {
+      margin: 18px 0 28px;
+      width: 460px;
+      max-width: 90vw;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 9px 16px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 14px;
+    }
+
+    .result-row.completed  { border-color: rgba(0, 255, 102, 0.3); }
+    .result-row.incomplete { border-color: rgba(255, 75, 75, 0.2); opacity: 0.65; }
+
+    .result-icon  { font-size: 22px; flex-shrink: 0; }
+    .result-name  { flex: 1; text-align: left; color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
+    .result-acc   { font-size: 13px; color: rgba(201,168,76,0.7); flex-shrink: 0; width: 42px; text-align: right; }
+    .result-check { font-size: 16px; flex-shrink: 0; }
+
+    .result-row.completed  .result-check { color: #00ff66; }
+    .result-row.incomplete .result-check { color: #ff4b4b; }
+    .result-row.completed  .result-acc   { color: #00ee55; }
+
+    .go-recipes-line {
+      font-size: 18px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .go-recipes-line strong { color: #C9A84C; font-size: 28px; }
+
+    /* ── Streak panel upgrade ── */
+    #streak-panel {
+      text-align: center;
+    }
+
+    #streak-mult {
+      font-size: 32px;
+      font-weight: bold;
+      color: #C9A84C;
+      line-height: 1;
+    }
+
+    /* ── Cursor ── */
+    body.can-select { cursor: pointer; }
+
+    /* ── Completed ingredient badges ── */
+    #completed-strip {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 20;
+      pointer-events: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 94vw;
+    }
+    .completed-badge {
+      background: rgba(0, 200, 80, 0.12);
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      border-radius: 5px;
+      padding: 6px 13px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .completed-badge.show { opacity: 1; transform: translateY(0); }
+    .completed-badge .b-emoji { font-size: 19px; }
+
+    /* ── Screen vignette ── */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.72) 100%);
+    }
+  </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+<div id="vignette"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-panel">
+    <div class="hud-label">Score</div>
+    <div class="hud-value" id="score-value">0</div>
+  </div>
+  <div class="hud-panel" id="streak-panel">
+    <div class="hud-label">Streak</div>
+    <div id="streak-mult">x1</div>
+    <div class="hud-label" style="margin-top:4px;" id="round-value">Dish 1 / 5</div>
+  </div>
+  <div class="hud-panel" style="text-align:right;">
+    <div class="hud-label">Time</div>
+    <div class="hud-value" id="timer-value">1:00</div>
+  </div>
+</div>
+
+<!-- Dish display -->
+<div id="dish-display">
+  <div id="dish-name"></div>
+  <div id="dish-instruction">Select ingredients in the correct order</div>
+  <div id="progress-wrap">
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="progress-label" id="progress-label"></div>
+  </div>
+</div>
+
+<!-- Feedback -->
+<div id="feedback"></div>
+
+<!-- Completed ingredients row -->
+<div id="completed-strip"></div>
+
+<!-- Title screen -->
+<div class="overlay" id="title-screen">
+  <div class="brand-tag">Hyatt Hotels &amp; Resorts</div>
+  <div class="gold-rule"></div>
+  <div class="game-title">Hyatt Recipe<br><span>Challenge</span></div>
+  <div class="game-subtitle">F&amp;B Staff Training</div>
+  <button class="btn" onclick="startGame()">Start Challenge</button>
+  <div class="dish-icons">&#127828; &#127829; &#127829; &#129380; &#127865;</div>
+  <div class="how-to-play">
+    5 recipes &bull; 60 seconds each &bull; select ingredients in order<br>
+    Streak bonuses: x2 at 3 correct &bull; x3 at 6 correct in a row
+  </div>
+</div>
+
+<!-- Round end -->
+<div class="overlay" id="round-end">
+  <div class="round-dish-emoji" id="re-emoji"></div>
+  <div class="round-title" id="re-title">Dish Complete!</div>
+  <div class="stat-row" id="re-stats"></div>
+  <button class="btn" id="next-dish-btn" onclick="nextRound()">Next Dish &rarr;</button>
+  <div style="font-size:10px;color:rgba(201,168,76,0.3);margin-top:18px;letter-spacing:2px;" id="auto-advance-label"></div>
+</div>
+
+<!-- Game over / Results -->
+<div class="overlay" id="game-over">
+  <div class="brand-tag">Challenge Complete</div>
+  <div class="gold-rule"></div>
+  <div class="go-recipes-line">Recipes mastered: <strong id="go-recipes-num">0</strong> / 5</div>
+  <div class="final-score-num" id="go-score">0</div>
+  <div class="rank-badge" id="go-rank"></div>
+  <div id="go-results-table"></div>
+  <button class="btn" onclick="restartGame()">Play Again</button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ─────────────────────────────────────────────
+// RECIPE DATA
+// ─────────────────────────────────────────────
+const DISHES = [
+  {
+    name: 'Hyatt Signature Burger',
+    emoji: '\u{1F354}',
+    ingredients: [
+      { name: 'Brioche Bun',   emoji: '\u{1F950}', cat: 'base'    },
+      { name: 'Beef Patty',    emoji: '\u{1F969}', cat: 'protein' },
+      { name: 'Cheddar',       emoji: '\u{1F9C0}', cat: 'dairy'   },
+      { name: 'Lettuce',       emoji: '\u{1F96C}', cat: 'produce' },
+      { name: 'Tomato',        emoji: '\u{1F345}', cat: 'produce' },
+      { name: 'Pickles',       emoji: '\u{1F952}', cat: 'produce' },
+      { name: 'Special Sauce', emoji: '\u{1FAD9}', cat: 'sauce'   },
+    ],
+  },
+  {
+    name: 'Caesar Salad',
+    emoji: '\u{1F957}',
+    ingredients: [
+      { name: 'Romaine',        emoji: '\u{1F96C}', cat: 'produce' },
+      { name: 'Croutons',       emoji: '\u{1F35E}', cat: 'base'    },
+      { name: 'Parmesan',       emoji: '\u{1F9C0}', cat: 'dairy'   },
+      { name: 'Caesar Dressing',emoji: '\u{1FAD9}', cat: 'sauce'   },
+      { name: 'Lemon Wedge',    emoji: '\u{1F34B}', cat: 'garnish' },
+      { name: 'Black Pepper',   emoji: '\u{1F33F}', cat: 'spice'   },
+    ],
+  },
+  {
+    name: 'Margherita Flatbread',
+    emoji: '\u{1F355}',
+    ingredients: [
+      { name: 'Flatbread Base',    emoji: '\u{1FAD3}', cat: 'base'    },
+      { name: 'Marinara',          emoji: '\u{1F345}', cat: 'sauce'   },
+      { name: 'Fresh Mozzarella',  emoji: '\u{1F9C0}', cat: 'dairy'   },
+      { name: 'Basil',             emoji: '\u{1F33F}', cat: 'garnish' },
+      { name: 'Olive Oil',         emoji: '\u{1FAD2}', cat: 'sauce'   },
+      { name: 'Sea Salt',          emoji: '\u{1F9C2}', cat: 'spice'   },
+    ],
+  },
+  {
+    name: 'Berry Smoothie Bowl',
+    emoji: '\u{1F964}',
+    ingredients: [
+      { name: 'Acai Base',     emoji: '\u{1F347}', cat: 'base'    },
+      { name: 'Banana',        emoji: '\u{1F34C}', cat: 'produce' },
+      { name: 'Blueberries',   emoji: '\u{1FAD0}', cat: 'produce' },
+      { name: 'Granola',       emoji: '\u{1F33E}', cat: 'base'    },
+      { name: 'Honey Drizzle', emoji: '\u{1F36F}', cat: 'sauce'   },
+      { name: 'Chia Seeds',    emoji: '\u{1F331}', cat: 'garnish' },
+    ],
+  },
+  {
+    name: 'Classic Mojito',
+    emoji: '\u{1F379}',
+    ingredients: [
+      { name: 'White Rum',   emoji: '\u{1F943}', cat: 'spirit'  },
+      { name: 'Lime Juice',  emoji: '\u{1F34B}', cat: 'citrus'  },
+      { name: 'Sugar',       emoji: '\u{1F36C}', cat: 'spice'   },
+      { name: 'Mint Leaves', emoji: '\u{1F331}', cat: 'garnish' },
+      { name: 'Soda Water',  emoji: '\u{1F4A7}', cat: 'liquid'  },
+      { name: 'Ice',         emoji: '\u{1F9CA}', cat: 'base'    },
+      { name: 'Lime Wheel',  emoji: '\u{1F7E2}', cat: 'garnish' },
+    ],
+  },
+];
+
+const CAT_COLORS = {
+  base:    { bg: '#2a1f0f', accent: '#A0721A' },
+  protein: { bg: '#2a0f0f', accent: '#9B2020' },
+  dairy:   { bg: '#2a2510', accent: '#9B8830' },
+  produce: { bg: '#0f2a10', accent: '#2A8A2E' },
+  sauce:   { bg: '#1e0f2a', accent: '#6B35B0' },
+  garnish: { bg: '#0f252a', accent: '#1A8A8E' },
+  spice:   { bg: '#2a1c0f', accent: '#9B6020' },
+  spirit:  { bg: '#0f0f2a', accent: '#3050C0' },
+  citrus:  { bg: '#2a280f', accent: '#9B9010' },
+  liquid:  { bg: '#0f1e2a', accent: '#1A60C0' },
+};
+
+// ─────────────────────────────────────────────
+// GAME STATE
+// ─────────────────────────────────────────────
+const GS = {
+  phase: 'title',
+  dishIdx: 0,
+  nextIdx: 0,
+  score: 0,
+  streak: 0,
+  prevMult: 1,          // track last streak multiplier to detect increases
+  timeLeft: 60,
+  timerHandle: null,
+  autoAdvanceHandle: null,
+  cards: [],            // THREE.Group[] — active ingredient cards
+  trayCards: [],        // cards that flew to tray
+  correct: 0,
+  wrong: 0,
+  dishResults: [],      // per-dish result objects
+};
+
+// ─────────────────────────────────────────────
+// THREE.JS GLOBALS
+// ─────────────────────────────────────────────
+let scene, camera, renderer, raycaster, mouse;
+let hoveredCard = null;
+let _cardBackTex = null; // cached
+
+// ─────────────────────────────────────────────
+// SCENE INIT
+// ─────────────────────────────────────────────
+function initScene() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1c1208);
+  scene.fog = new THREE.FogExp2(0x1c1208, 0.018);
+
+  camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 120);
+  camera.position.set(0, 9.5, 12);
+  camera.lookAt(0, 0, -1);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.4;
+  document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2(-10, -10);
+
+  // Lights — bright kitchen feel
+  scene.add(new THREE.AmbientLight(0xfff8e8, 1.1));
+
+  const sun = new THREE.DirectionalLight(0xfffaf0, 2.2);
+  sun.position.set(5, 14, 8);
+  sun.castShadow = true;
+  sun.shadow.mapSize.setScalar(2048);
+  sun.shadow.camera.near = 0.5;
+  sun.shadow.camera.far = 50;
+  sun.shadow.camera.left = -12;
+  sun.shadow.camera.right = 12;
+  sun.shadow.camera.top = 12;
+  sun.shadow.camera.bottom = -12;
+  scene.add(sun);
+
+  // Warm under-fill to lift card faces
+  const fill = new THREE.DirectionalLight(0xffe0a0, 0.7);
+  fill.position.set(0, -4, 10);
+  scene.add(fill);
+
+  // Soft back-rim for depth
+  const rim = new THREE.DirectionalLight(0xc0d8ff, 0.4);
+  rim.position.set(-6, 6, -10);
+  scene.add(rim);
+
+  buildEnvironment();
+
+  renderer.domElement.addEventListener('mousemove', e => {
+    mouse.x =  (e.clientX / innerWidth)  * 2 - 1;
+    mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+  });
+  renderer.domElement.addEventListener('click', handleClick);
+  renderer.domElement.addEventListener('touchend', e => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    mouse.x =  (t.clientX / innerWidth)  * 2 - 1;
+    mouse.y = -(t.clientY / innerHeight) * 2 + 1;
+    handleClick();
+  }, { passive: false });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────────
+// ENVIRONMENT
+// ─────────────────────────────────────────────
+function buildEnvironment() {
+  // Counter top
+  const counterGeo = new THREE.BoxGeometry(20, 0.28, 16);
+  const counterMat = new THREE.MeshStandardMaterial({
+    map: makeWoodTex(),
+    roughness: 0.72,
+    metalness: 0.04,
+  });
+  const counter = new THREE.Mesh(counterGeo, counterMat);
+  counter.position.set(0, -2.3, -1);
+  counter.receiveShadow = true;
+  scene.add(counter);
+
+  // Tray surface (darker inset at back)
+  const trayGeo = new THREE.BoxGeometry(15, 0.06, 2.8);
+  const trayMat = new THREE.MeshStandardMaterial({ color: 0x100d00, roughness: 0.55, metalness: 0.25 });
+  const tray = new THREE.Mesh(trayGeo, trayMat);
+  tray.position.set(0, -2.16, 3.8);
+  scene.add(tray);
+
+  // Tray gold trim
+  const edges = new THREE.EdgesGeometry(trayGeo);
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0xC9A84C });
+  const trim = new THREE.LineSegments(edges, edgeMat);
+  trim.position.copy(tray.position);
+  scene.add(trim);
+
+  // Tray label divider line
+  const divGeo = new THREE.PlaneGeometry(14.8, 0.015);
+  const divMat = new THREE.MeshBasicMaterial({ color: 0xC9A84C, opacity: 0.5, transparent: true });
+  const div = new THREE.Mesh(divGeo, divMat);
+  div.rotation.x = -Math.PI / 2;
+  div.position.set(0, -2.12, 3.8);
+  scene.add(div);
+
+  // Ambient dust
+  spawnDust();
+}
+
+function spawnDust() {
+  const N = 140;
+  const pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    pos[i*3]   = (Math.random() - 0.5) * 18;
+    pos[i*3+1] = Math.random() * 9 - 1.5;
+    pos[i*3+2] = (Math.random() - 0.5) * 14;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({ color: 0xC9A84C, size: 0.035, transparent: true, opacity: 0.25 });
+  const dust = new THREE.Points(geo, mat);
+  scene.add(dust);
+  gsap.to(dust.rotation, { y: Math.PI * 2, duration: 80, repeat: -1, ease: 'none' });
+}
+
+// ─────────────────────────────────────────────
+// CANVAS TEXTURES
+// ─────────────────────────────────────────────
+function makeWoodTex() {
+  const W = 1024, H = 1024;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+
+  // Base — warm dark walnut
+  const base = ctx.createLinearGradient(0, 0, W, H * 0.3);
+  base.addColorStop(0,   '#4a2a0e');
+  base.addColorStop(0.4, '#5c3415');
+  base.addColorStop(1,   '#3d2008');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+
+  // Long grain lines using quadratic bezier curves
+  for (let i = 0; i < 90; i++) {
+    const y    = (i / 90) * H * 1.1 - H * 0.05;
+    const cpX  = W * (0.3 + Math.random() * 0.4);
+    const cpY  = y + (Math.random() - 0.5) * 80;
+    const endY = y + (Math.random() - 0.5) * 30;
+    const dark = Math.random() > 0.5;
+    const r    = dark ? 30 + (Math.random() * 25 | 0) : 80 + (Math.random() * 40 | 0);
+    const g    = dark ? 15 + (Math.random() * 12 | 0) : 42 + (Math.random() * 20 | 0);
+    const a    = 0.1 + Math.random() * 0.35;
+    ctx.strokeStyle = `rgba(${r},${g},4,${a})`;
+    ctx.lineWidth   = Math.random() * 3 + 0.4;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.quadraticCurveTo(cpX, cpY, W, endY);
+    ctx.stroke();
+  }
+
+  // Fine micro-grain overlay (dense, thin)
+  for (let i = 0; i < 200; i++) {
+    const y = Math.random() * H;
+    ctx.strokeStyle = `rgba(${20 + (Math.random()*30|0)},${8 + (Math.random()*12|0)},2,${0.08 + Math.random()*0.12})`;
+    ctx.lineWidth = 0.4 + Math.random() * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y + (Math.random() - 0.5) * 15);
+    ctx.stroke();
+  }
+
+  // Wood knot — one subtle elliptical knot
+  const kx = W * (0.3 + Math.random() * 0.4);
+  const ky = H * (0.25 + Math.random() * 0.5);
+  for (let ring = 12; ring >= 0; ring--) {
+    const rx = 18 + ring * 8;
+    const ry = 10 + ring * 4;
+    const alpha = ring === 0 ? 0.55 : 0.04 + (12 - ring) * 0.015;
+    ctx.strokeStyle = `rgba(20,8,0,${alpha})`;
+    ctx.lineWidth = ring === 0 ? 2 : 1;
+    ctx.beginPath();
+    ctx.ellipse(kx, ky, rx, ry, 0.2, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  // Knot core
+  const kGrad = ctx.createRadialGradient(kx, ky, 0, kx, ky, 14);
+  kGrad.addColorStop(0, 'rgba(15,5,0,0.7)');
+  kGrad.addColorStop(1, 'rgba(15,5,0,0)');
+  ctx.fillStyle = kGrad;
+  ctx.beginPath();
+  ctx.ellipse(kx, ky, 14, 8, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Highlight band — simulates overhead light reflection
+  const hi = ctx.createLinearGradient(0, H * 0.28, 0, H * 0.58);
+  hi.addColorStop(0,   'rgba(255,200,120,0)');
+  hi.addColorStop(0.3, 'rgba(255,200,120,0.07)');
+  hi.addColorStop(0.5, 'rgba(255,200,120,0.13)');
+  hi.addColorStop(0.7, 'rgba(255,200,120,0.07)');
+  hi.addColorStop(1,   'rgba(255,200,120,0)');
+  ctx.fillStyle = hi;
+  ctx.fillRect(0, 0, W, H);
+
+  // Edge vignette
+  const vig = ctx.createRadialGradient(W/2, H/2, H * 0.2, W/2, H/2, H * 0.75);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,0.4)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  const woodTex = new THREE.CanvasTexture(c);
+  woodTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return woodTex;
+}
+
+function getCardBackTex() {
+  if (_cardBackTex) return _cardBackTex;
+
+  const c = document.createElement('canvas');
+  c.width = 840; c.height = 1200;
+  const ctx = c.getContext('2d');
+
+  ctx.fillStyle = '#12111e';
+  ctx.fillRect(0, 0, 840, 1200);
+
+  // Subtle radial gradient
+  const rg = ctx.createRadialGradient(420, 600, 90, 420, 600, 630);
+  rg.addColorStop(0, 'rgba(40,35,60,0.5)');
+  rg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = rg;
+  ctx.fillRect(0, 0, 840, 1200);
+
+  // Gold outer border
+  ctx.strokeStyle = '#C9A84C';
+  ctx.lineWidth = 10;
+  ctx.strokeRect(16, 16, 808, 1168);
+
+  // Corner dots
+  [[60,60],[780,60],[60,1140],[780,1140]].forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 14, 0, Math.PI * 2);
+    ctx.fillStyle = '#C9A84C';
+    ctx.fill();
+  });
+
+  // Big faint H
+  ctx.font = 'bold 360px Georgia';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(201,168,76,0.07)';
+  ctx.fillText('H', 420, 580);
+
+  // Gold H
+  ctx.font = 'bold 240px Georgia';
+  ctx.fillStyle = '#C9A84C';
+  ctx.shadowColor = 'rgba(201,168,76,0.5)';
+  ctx.shadowBlur = 50;
+  ctx.fillText('H', 420, 570);
+  ctx.shadowBlur = 0;
+
+  // HYATT text — large and bright
+  ctx.font = 'bold 72px Georgia';
+  ctx.fillStyle = 'rgba(201,168,76,0.92)';
+  ctx.fillText('HYATT', 420, 880);
+
+  // RECIPE TRAINING text
+  ctx.font = 'bold 44px Georgia';
+  ctx.fillStyle = 'rgba(201,168,76,0.65)';
+  ctx.fillText('RECIPE TRAINING', 420, 960);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  _cardBackTex = tex;
+  return _cardBackTex;
+}
+
+function makeCardFrontTex(ing) {
+  const c = document.createElement('canvas');
+  c.width = 840; c.height = 1200;  // 3× resolution — bigger text & emoji
+  const ctx = c.getContext('2d');
+
+  const col = CAT_COLORS[ing.cat] || CAT_COLORS.base;
+
+  // Background
+  ctx.fillStyle = '#12111e';
+  ctx.fillRect(0, 0, 840, 1200);
+
+  // Header band
+  const hg = ctx.createLinearGradient(0, 0, 840, 264);
+  hg.addColorStop(0, col.bg);
+  hg.addColorStop(1, col.accent + '33');
+  ctx.fillStyle = hg;
+  ctx.fillRect(0, 0, 840, 264);
+
+  // Gold border
+  ctx.strokeStyle = '#C9A84C';
+  ctx.lineWidth = 10;
+  ctx.strokeRect(14, 14, 812, 1172);
+
+  // Category label — centered in header band
+  ctx.font = 'bold 56px Arial';
+  ctx.fillStyle = 'rgba(255,230,140,0.95)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(ing.cat.toUpperCase(), 420, 132);
+
+  // Separator line
+  ctx.strokeStyle = col.accent + '55';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(84, 264);
+  ctx.lineTo(756, 264);
+  ctx.stroke();
+
+  // Emoji — Twemoji image if preloaded, else canvas text fallback
+  if (emojiImgCache[ing.emoji]) {
+    const imgSize = 380;
+    ctx.drawImage(emojiImgCache[ing.emoji], 420 - imgSize / 2, 300, imgSize, imgSize);
+  } else {
+    ctx.font = '320px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ing.emoji, 420, 530);
+  }
+
+  // Ingredient name — wrapping for long names
+  ctx.shadowColor = col.accent;
+  ctx.shadowBlur = 28;
+  ctx.fillStyle = '#ffffff';
+  ctx.textBaseline = 'middle';
+
+  const words = ing.name.split(' ');
+  if (ing.name.length > 13 && words.length > 1) {
+    const mid = Math.ceil(words.length / 2);
+    ctx.font = 'bold 60px Georgia';
+    ctx.fillText(words.slice(0, mid).join(' '), 420, 920);
+    ctx.fillText(words.slice(mid).join(' '),    420, 1004);
+  } else {
+    ctx.font = 'bold 68px Georgia';
+    ctx.fillText(ing.name, 420, 960);
+  }
+  ctx.shadowBlur = 0;
+
+  // Bottom accent bar
+  ctx.fillStyle = col.accent;
+  ctx.fillRect(240, 1140, 360, 6);
+
+  const frontTex = new THREE.CanvasTexture(c);
+  frontTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return frontTex;
+}
+
+// ─────────────────────────────────────────────
+// CARD FACTORY
+// ─────────────────────────────────────────────
+function createCard(ing) {
+  const group = new THREE.Group();
+  group.userData = { ing, selected: false, baseY: 0 };
+
+  const W = 1.85, H = 2.65;
+
+  // Front face
+  const frontGeo = new THREE.PlaneGeometry(W, H);
+  const frontMat = new THREE.MeshStandardMaterial({
+    map: makeCardFrontTex(ing),
+    roughness: 0.22,
+    metalness: 0.1,
+  });
+  const front = new THREE.Mesh(frontGeo, frontMat);
+  front.position.z = 0.022;  // clearly in front of edge box face (±0.014)
+  front.castShadow = true;
+  group.add(front);
+
+  // Back face
+  const backGeo = new THREE.PlaneGeometry(W, H);
+  const backMat = new THREE.MeshStandardMaterial({
+    map: getCardBackTex(),
+    roughness: 0.22,
+    metalness: 0.1,
+  });
+  const back = new THREE.Mesh(backGeo, backMat);
+  back.rotation.y = Math.PI;
+  back.position.z = -0.022;  // clearly behind edge box face
+  back.castShadow = true;
+  group.add(back);
+
+  // Edge
+  const edgeGeo = new THREE.BoxGeometry(W + 0.01, H + 0.01, 0.028);
+  const edgeMat = new THREE.MeshStandardMaterial({ color: 0x2a1f14, roughness: 0.85 });
+  group.add(new THREE.Mesh(edgeGeo, edgeMat));
+
+  group.userData.frontMat = frontMat;
+  group.userData.backMat  = backMat;
+
+  return group;
+}
+
+// ─────────────────────────────────────────────
+// CARD LAYOUT
+// ─────────────────────────────────────────────
+function cardPositions(n) {
+  // Always a single clean horizontal row, evenly spaced
+  const xGap = Math.min(2.15, 15.0 / Math.max(n - 1, 1));
+  const totalW = (n - 1) * xGap;
+  return Array.from({ length: n }, (_, i) => ({
+    x: i * xGap - totalW / 2,
+    y: -0.5,
+    z: 0,
+    ry: 0,
+    rz: 0,
+  }));
+}
+
+// ─────────────────────────────────────────────
+// DEAL CARDS
+// ─────────────────────────────────────────────
+function dealCards(dish) {
+  purgeCards();
+
+  // Shuffle
+  const shuffled = [...dish.ingredients].sort(() => Math.random() - 0.5);
+  const positions = cardPositions(shuffled.length);
+
+  shuffled.forEach((ing, i) => {
+    const card = createCard(ing);
+
+    // Start below screen, face-down (back toward camera)
+    card.position.set(positions[i].x, -9, positions[i].z);
+    card.rotation.y = Math.PI;
+    card.rotation.z = 0;
+
+    scene.add(card);
+    GS.cards.push(card);
+
+    // Deal-in stagger
+    gsap.to(card.position, {
+      y: positions[i].y,
+      duration: 0.55,
+      delay: i * 0.09,
+      ease: 'back.out(1.3)',
+    });
+  });
+}
+
+function floatCard(card, base) {
+  if (card.userData.selected) return;
+  card.userData.baseY = base.y;
+
+  const dur = 2.0 + Math.random() * 1.5;
+  const amp = 0.05 + Math.random() * 0.06;
+
+  // Gentle vertical oscillation only — no tilt, keeps the row clean
+  card.userData.ft = gsap.to(card.position, {
+    y: base.y + amp,
+    duration: dur,
+    yoyo: true, repeat: -1,
+    ease: 'sine.inOut',
+    delay: Math.random() * dur,
+  });
+}
+
+function purgeCards() {
+  [...GS.cards, ...GS.trayCards].forEach(card => {
+    if (card.userData.ft) card.userData.ft.kill();
+    scene.remove(card);
+    card.traverse(o => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) {
+        if (o.material.map && o.material.map !== _cardBackTex) o.material.map.dispose();
+        o.material.dispose();
+      }
+    });
+  });
+  GS.cards = [];
+  GS.trayCards = [];
+}
+
+// ─────────────────────────────────────────────
+// CARD ANIMATIONS
+// ─────────────────────────────────────────────
+function flipAndFly(card, slotIdx, totalSlots) {
+  if (card.userData.ft) card.userData.ft.kill();
+  if (card.userData.wt) card.userData.wt.kill();
+  card.userData.selected = true;
+
+  const spacing = Math.min(1.6, 10.0 / Math.max(totalSlots - 1, 1));
+  const tx = (slotIdx - (totalSlots - 1) / 2) * spacing;
+  // Upright cards sitting on the tray surface (tray at y=-2.16, card half-height=1.325)
+  const ty = -2.16 + 1.325 + 0.1;  // = -0.735 — bottom edge just above tray
+  const tz =  3.8;
+
+  card.rotation.y = 0;
+  // Stand cards upright (rotation.x = 0) so the texture is viewed at a consistent angle
+  // — eliminates mipmap scan-line artifacts caused by perspective differential on a tilted card
+  gsap.to(card.rotation, { x: 0, z: 0, duration: 0.5, ease: 'power2.out' });
+  gsap.to(card.position,  { x: tx, y: ty, z: tz, duration: 0.55, delay: 0.08, ease: 'power3.inOut' });
+
+  GS.trayCards.push(card);
+}
+
+function addCompletedBadge(ing) {
+  const strip = document.getElementById('completed-strip');
+  const badge = document.createElement('div');
+  badge.className = 'completed-badge';
+  badge.innerHTML = `<span class="b-emoji">${ing.emoji}</span><span>${ing.name}</span>`;
+  strip.appendChild(badge);
+  requestAnimationFrame(() => requestAnimationFrame(() => badge.classList.add('show')));
+}
+
+function shakeCard(card) {
+  const ox = card.position.x;
+  gsap.killTweensOf(card.position, 'x');
+  gsap.to(card.position, {
+    keyframes: [
+      { x: ox + 0.22, duration: 0.06 },
+      { x: ox - 0.22, duration: 0.06 },
+      { x: ox + 0.16, duration: 0.06 },
+      { x: ox - 0.16, duration: 0.06 },
+      { x: ox + 0.08, duration: 0.06 },
+      { x: ox,        duration: 0.06 },
+    ],
+    ease: 'none',
+  });
+
+  card.userData.frontMat.emissive.set(0xff1111);
+  card.userData.frontMat.emissiveIntensity = 0.3;
+  gsap.to(card.userData.frontMat, {
+    emissiveIntensity: 0,
+    duration: 0.55,
+    ease: 'power2.out',
+    onComplete: () => card.userData.frontMat.emissive.set(0x000000),
+  });
+}
+
+// ─────────────────────────────────────────────
+// PARTICLES
+// ─────────────────────────────────────────────
+function burst(pos) {
+  const N = 44;
+  const arr = new Float32Array(N * 3);
+  const vel = [];
+
+  for (let i = 0; i < N; i++) {
+    arr[i*3] = pos.x; arr[i*3+1] = pos.y; arr[i*3+2] = pos.z;
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.random() * Math.PI;
+    const speed = 1.2 + Math.random() * 2.2;
+    vel.push({
+      x: Math.sin(phi) * Math.cos(theta) * speed,
+      y: Math.abs(Math.cos(phi)) * speed * 0.9 + 0.4,
+      z: Math.sin(phi) * Math.sin(theta) * speed,
+    });
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const mat = new THREE.PointsMaterial({
+    color: 0xC9A84C, size: 0.09,
+    transparent: true, opacity: 1,
+    sizeAttenuation: true,
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+
+  let t = 0;
+  const tick = () => {
+    t += 0.018;
+    if (t > 1) { scene.remove(pts); geo.dispose(); mat.dispose(); return; }
+    const a = geo.attributes.position.array;
+    for (let i = 0; i < N; i++) {
+      a[i*3]   = pos.x + vel[i].x * t;
+      a[i*3+1] = pos.y + vel[i].y * t - 3.5 * t * t;
+      a[i*3+2] = pos.z + vel[i].z * t;
+    }
+    geo.attributes.position.needsUpdate = true;
+    mat.opacity = 1 - t;
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function confettiBurst(pos, color) {
+  const N = 55;
+  const arr = new Float32Array(N * 3);
+  const vel = [];
+
+  for (let i = 0; i < N; i++) {
+    arr[i*3] = pos.x; arr[i*3+1] = pos.y; arr[i*3+2] = pos.z;
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = (Math.random() * 0.6 + 0.2) * Math.PI; // mostly upward
+    const spd   = 1.5 + Math.random() * 2.8;
+    vel.push({
+      x: Math.sin(phi) * Math.cos(theta) * spd,
+      y: Math.abs(Math.cos(phi)) * spd * 1.1 + 0.5,
+      z: Math.sin(phi) * Math.sin(theta) * spd,
+    });
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const mat = new THREE.PointsMaterial({
+    color, size: 0.12, transparent: true, opacity: 1, sizeAttenuation: true,
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+
+  let t = 0;
+  const tick = () => {
+    t += 0.02;
+    if (t > 1) { scene.remove(pts); geo.dispose(); mat.dispose(); return; }
+    const a = geo.attributes.position.array;
+    for (let i = 0; i < N; i++) {
+      a[i*3]   = pos.x + vel[i].x * t;
+      a[i*3+1] = pos.y + vel[i].y * t - 4 * t * t;
+      a[i*3+2] = pos.z + vel[i].z * t;
+    }
+    geo.attributes.position.needsUpdate = true;
+    mat.opacity = Math.max(0, 1 - t * 1.1);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ─────────────────────────────────────────────
+// HOVER & CLICK
+// ─────────────────────────────────────────────
+function updateHover() {
+  if (GS.phase !== 'playing') {
+    document.body.style.cursor = 'default';
+    return;
+  }
+  raycaster.setFromCamera(mouse, camera);
+
+  const targets = GS.cards.filter(c => !c.userData.selected && !c.userData.flipping);
+  const hits = raycaster.intersectObjects(targets, true);
+
+  let hit = null;
+  if (hits.length > 0) {
+    let obj = hits[0].object;
+    while (obj && !obj.userData.ing) obj = obj.parent;
+    if (obj && obj.userData.ing) hit = obj;
+  }
+
+  if (hit !== hoveredCard) {
+    if (hoveredCard && !hoveredCard.userData.selected) {
+      gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
+      hoveredCard.userData.frontMat.emissiveIntensity = 0;
+    }
+    hoveredCard = hit;
+    if (hoveredCard) {
+      gsap.to(hoveredCard.scale, { x: 1.06, y: 1.06, z: 1.06, duration: 0.18 });
+      hoveredCard.userData.frontMat.emissive.set(0xC9A84C);
+      hoveredCard.userData.frontMat.emissiveIntensity = 0.18;
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'default';
+    }
+  }
+}
+
+function handleClick() {
+  if (GS.phase !== 'playing') return;
+  raycaster.setFromCamera(mouse, camera);
+
+  const targets = GS.cards.filter(c => !c.userData.selected && !c.userData.flipping);
+  const hits = raycaster.intersectObjects(targets, true);
+  if (!hits.length) return;
+
+  let card = hits[0].object;
+  while (card && !card.userData.ing) card = card.parent;
+  if (!card || card.userData.selected || card.userData.flipping) return;
+
+  pickIngredient(card);
+}
+
+// ─────────────────────────────────────────────
+// GAME LOGIC
+// ─────────────────────────────────────────────
+function startGame() {
+  document.getElementById('title-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+
+  GS.score       = 0;
+  GS.streak      = 0;
+  GS.prevMult    = 1;
+  GS.dishIdx     = 0;
+  GS.phase       = 'playing';
+  GS.dishResults = [];
+  startAmbient();
+
+  refreshHUD();
+  startRound();
+}
+
+function startRound() {
+  const dish = DISHES[GS.dishIdx];
+
+  GS.nextIdx  = 0;
+  GS.timeLeft = 60;
+  GS.correct  = 0;
+  GS.wrong    = 0;
+  GS.phase    = 'playing';
+
+  document.getElementById('completed-strip').innerHTML = '';
+  document.getElementById('dish-display').style.display = 'block';
+
+  const dn = document.getElementById('dish-name');
+  dn.style.opacity = '0';
+  dn.textContent = dish.name;
+  gsap.to(dn, { opacity: 1, duration: 0.5, delay: 0.2 });
+
+  document.getElementById('round-value').textContent = `Dish ${GS.dishIdx + 1} / ${DISHES.length}`;
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-label').textContent = `0 of ${dish.ingredients.length}`;
+
+  dealCards(dish);
+
+  clearInterval(GS.timerHandle);
+  GS.timerHandle = setInterval(tickTimer, 1000);
+  renderTimer();
+}
+
+function pickIngredient(card) {
+  // Lock card during flip so double-clicks are ignored
+  card.userData.flipping = true;
+
+  // Phase 1: flip from back (π) → front (0), revealing the ingredient
+  gsap.to(card.rotation, {
+    y: 0,
+    duration: 0.38,
+    ease: 'power2.inOut',
+    onComplete: () => evaluateCard(card),
+  });
+}
+
+function evaluateCard(card) {
+  const dish     = DISHES[GS.dishIdx];
+  const expected = dish.ingredients[GS.nextIdx];
+
+  if (card.userData.ing.name === expected.name) {
+    // ── Correct ──
+    GS.correct++;
+    GS.streak++;
+
+    const mult   = GS.streak >= 6 ? 3 : GS.streak >= 3 ? 2 : 1;
+    const points = 100 * mult;
+    GS.score += points;
+
+    sfxCorrect();
+    // Green glow on correct — keep intensity low so texture stays visible
+    card.userData.frontMat.emissive.set(0x00ee55);
+    card.userData.frontMat.emissiveIntensity = 0.2;
+
+    burst(card.position.clone());
+    flipAndFly(card, GS.nextIdx, dish.ingredients.length);
+
+    GS.nextIdx++;
+
+    const pct = GS.nextIdx / dish.ingredients.length * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent =
+      `${GS.nextIdx} of ${dish.ingredients.length}`;
+
+    const label = mult > 1
+      ? `+${points}  \u{1F525} x${mult} streak!`
+      : `+${points}  Correct!`;
+    showFeedback(label, '#C9A84C');
+
+    if (GS.nextIdx >= dish.ingredients.length) {
+      setTimeout(celebrateComplete, 700);
+    }
+  } else {
+    // ── Wrong: show front briefly, then flip back face-down ──
+    sfxWrong();
+    GS.wrong++;
+    GS.streak = 0;
+    shakeCard(card);
+    showFeedback('Wrong order \u2014 try again', '#ff4b4b');
+
+    setTimeout(() => {
+      gsap.to(card.rotation, {
+        y: Math.PI,
+        duration: 0.38,
+        ease: 'power2.inOut',
+        onComplete: () => { card.userData.flipping = false; },
+      });
+    }, 650);
+  }
+
+  refreshHUD();
+}
+
+// ─────────────────────────────────────────────
+// COMPLETE CELEBRATION
+// ─────────────────────────────────────────────
+function celebrateComplete() {
+  GS.phase = 'celebrating';
+  clearInterval(GS.timerHandle);
+  sfxComplete();
+
+  // Staggered green flash on every tray card
+  GS.trayCards.forEach((card, i) => {
+    setTimeout(() => {
+      card.userData.frontMat.emissive.set(0x00ff66);
+      card.userData.frontMat.emissiveIntensity = 0.35;
+      burst(card.position.clone());
+      gsap.to(card.userData.frontMat, {
+        emissiveIntensity: 0.1, duration: 0.7, delay: 0.15, ease: 'power2.out',
+      });
+    }, i * 90);
+  });
+
+  // Multi-color confetti cascade after the tray flash
+  const lastDelay = GS.trayCards.length * 90 + 60;
+  const confettiColors = [0xC9A84C, 0xffffff, 0x006E96, 0x00cc66, 0xffa040];
+  confettiColors.forEach((col, i) => {
+    setTimeout(() => confettiBurst(new THREE.Vector3((i - 2) * 1.6, 0.5, 0), col), lastDelay + i * 70);
+  });
+  setTimeout(() => confettiBurst(new THREE.Vector3(0, 1.0, 0), 0xC9A84C), lastDelay + 420);
+
+  // "Complete!" overlay text
+  showCompleteOverlay(DISHES[GS.dishIdx].name);
+
+  // Auto-advance to round-end stats after celebration finishes
+  setTimeout(endRound, 2600);
+}
+
+function showCompleteOverlay(dishName) {
+  // Reuse the feedback element for the big COMPLETE message
+  const el = document.getElementById('feedback');
+  gsap.killTweensOf(el);
+
+  el.innerHTML = `<div style="font-size:13px;letter-spacing:4px;text-transform:uppercase;
+    color:rgba(0,255,102,0.7);margin-bottom:8px;">${dishName}</div>
+    <div style="font-size:52px;color:#00ff88;
+    text-shadow:0 0 40px rgba(0,255,102,0.8);">&#10003; Complete!</div>`;
+  el.style.color = '#00ff88';
+  el.style.bottom = '50%';
+  el.style.transform = 'translateX(-50%) translateY(50%)';
+
+  gsap.fromTo(el,
+    { opacity: 0 },
+    {
+      opacity: 1, duration: 0.35, ease: 'power2.out',
+      onComplete: () => {
+        gsap.to(el, {
+          opacity: 0, duration: 0.4, delay: 1.6, ease: 'power2.in',
+          onComplete: () => {
+            el.innerHTML = '';
+            el.style.bottom  = '90px';
+            el.style.transform = 'translateX(-50%)';
+          },
+        });
+      },
+    }
+  );
+}
+
+function endRound() {
+  clearInterval(GS.timerHandle);
+  GS.phase = 'roundEnd';
+
+  const tb = GS.timeLeft * 50;
+  GS.score += tb;
+
+  const dish = DISHES[GS.dishIdx];
+  const acc  = GS.correct + GS.wrong > 0
+    ? Math.round(GS.correct / (GS.correct + GS.wrong) * 100)
+    : 100;
+
+  const completed = GS.nextIdx >= dish.ingredients.length;
+  const isLast    = GS.dishIdx >= DISHES.length - 1;
+
+  // Record this dish's result
+  GS.dishResults.push({
+    name:      dish.name,
+    emoji:     dish.emoji,
+    completed,
+    accuracy:  acc,
+    timeLeft:  GS.timeLeft,
+  });
+
+  document.getElementById('re-emoji').textContent = dish.emoji;
+  document.getElementById('re-title').textContent = dish.name + ' \u2014 ' + (completed ? 'Complete!' : 'Time\'s up!');
+  document.getElementById('re-stats').innerHTML =
+    `Accuracy: <strong style="color:${acc >= 80 ? '#00ff88' : '#C9A84C'}">${acc}%</strong><br>` +
+    `Time Bonus: <strong>+${tb}</strong><br>` +
+    `Total Score: <strong>${GS.score.toLocaleString()}</strong>`;
+
+  document.getElementById('next-dish-btn').textContent =
+    isLast ? 'See Final Score \u2192' : 'Next Dish \u2192';
+
+  document.getElementById('round-end').classList.add('show');
+  refreshHUD();
+
+  // Auto-advance countdown (4 s)
+  let countdown = 4;
+  const label = document.getElementById('auto-advance-label');
+  label.textContent = `Continuing in ${countdown}s\u2026`;
+  const iv = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(iv);
+      label.textContent = '';
+      nextRound();
+    } else {
+      label.textContent = `Continuing in ${countdown}s\u2026`;
+    }
+  }, 1000);
+
+  // Store so nextRound() can cancel it if clicked early
+  GS.autoAdvanceHandle = iv;
+}
+
+function nextRound() {
+  clearInterval(GS.autoAdvanceHandle);
+  document.getElementById('auto-advance-label').textContent = '';
+  document.getElementById('round-end').classList.remove('show');
+  GS.dishIdx++;
+
+  if (GS.dishIdx >= DISHES.length) {
+    endGame();
+  } else {
+    startRound();
+  }
+}
+
+function endGame() {
+  clearInterval(GS.timerHandle);
+  clearInterval(GS.autoAdvanceHandle);
+  purgeCards();
+  stopAmbient();
+  GS.phase = 'gameOver';
+
+  document.getElementById('dish-display').style.display = 'none';
+  document.getElementById('hud').style.display = 'none';
+
+  // Tally results
+  const mastered   = GS.dishResults.filter(r => r.completed).length;
+  const overallAcc = GS.dishResults.length
+    ? Math.round(GS.dishResults.reduce((s, r) => s + r.accuracy, 0) / GS.dishResults.length)
+    : 0;
+
+  const rank = mastered === 5 && overallAcc === 100 ? 'Executive Chef \u2605'
+             : mastered >= 4  ? 'Sous Chef'
+             : mastered >= 3  ? 'Line Cook'
+             : mastered >= 1  ? 'Prep Cook'
+             : 'Apprentice';
+
+  document.getElementById('go-recipes-num').textContent = mastered;
+  document.getElementById('go-score').textContent = GS.score.toLocaleString();
+  document.getElementById('go-rank').innerHTML =
+    `<span>${rank}</span> &nbsp;&bull;&nbsp; ${overallAcc}% avg accuracy`;
+
+  // Per-dish results table
+  const rows = GS.dishResults.map(r => {
+    const cls   = r.completed ? 'completed' : 'incomplete';
+    const check = r.completed ? '&#10003;' : '&#10007;';
+    const acc   = r.accuracy + '%';
+    return `<div class="result-row ${cls}">
+      <span class="result-icon">${r.emoji}</span>
+      <span class="result-name">${r.name}</span>
+      <span class="result-acc">${acc}</span>
+      <span class="result-check">${check}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('go-results-table').innerHTML = rows;
+  document.getElementById('game-over').classList.add('show');
+}
+
+function restartGame() {
+  document.getElementById('game-over').classList.remove('show');
+  document.getElementById('hud').style.display = 'flex';
+  hoveredCard = null;
+  startGame();
+}
+
+// ─────────────────────────────────────────────
+// TIMER & HUD
+// ─────────────────────────────────────────────
+function tickTimer() {
+  if (GS.phase !== 'playing') return;
+  GS.timeLeft = Math.max(0, GS.timeLeft - 1);
+  renderTimer();
+  if (GS.timeLeft === 0) {
+    clearInterval(GS.timerHandle);
+    showFeedback("Time's up!", '#ff4b4b');
+    setTimeout(endRound, 900);
+  }
+}
+
+function renderTimer() {
+  const el = document.getElementById('timer-value');
+  const m  = Math.floor(GS.timeLeft / 60);
+  const s  = GS.timeLeft % 60;
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  const urgent = GS.timeLeft <= 10 && GS.timeLeft > 0;
+  el.classList.toggle('urgent', urgent);
+  if (urgent) sfxTick();
+}
+
+function refreshHUD() {
+  // Score with pop animation
+  const scoreEl = document.getElementById('score-value');
+  scoreEl.textContent = GS.score.toLocaleString();
+  scoreEl.classList.remove('score-pop');
+  void scoreEl.offsetWidth; // reflow to restart animation
+  scoreEl.classList.add('score-pop');
+
+  // Streak multiplier with flash when it increases
+  const mult     = GS.streak >= 6 ? 3 : GS.streak >= 3 ? 2 : 1;
+  const multEl   = document.getElementById('streak-mult');
+  multEl.textContent = `x${mult}`;
+
+  if (mult > GS.prevMult) {
+    multEl.classList.remove('streak-flash');
+    void multEl.offsetWidth;
+    multEl.classList.add('streak-flash');
+    multEl.style.color = mult >= 3 ? '#ff9900' : '#C9A84C';
+  } else if (GS.streak === 0) {
+    multEl.style.color = '#C9A84C';
+  }
+  GS.prevMult = mult;
+}
+
+function showFeedback(text, color = '#C9A84C') {
+  const el = document.getElementById('feedback');
+  gsap.killTweensOf(el);
+  el.textContent = text;
+  el.style.color = color;
+  gsap.fromTo(el,
+    { opacity: 1, y: 0 },
+    { opacity: 0, y: -28, duration: 1.5, ease: 'power2.out' }
+  );
+}
+
+// ─────────────────────────────────────────────
+// RENDER LOOP
+// ─────────────────────────────────────────────
+function loop() {
+  requestAnimationFrame(loop);
+  updateHover();
+  renderer.render(scene, camera);
+}
+
+// ─────────────────────────────────────────────
+// TWEMOJI IMAGE PRELOADER
+// ─────────────────────────────────────────────
+const TWEMOJI_BASE = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/72x72/';
+const emojiImgCache = {};
+
+function emojiToCP(em) {
+  return [...em]
+    .map(c => c.codePointAt(0).toString(16))
+    .filter(h => h !== 'fe0f' && h !== 'fe0e')
+    .join('-');
+}
+
+function preloadEmoji() {
+  const all = [...new Set(DISHES.flatMap(d => d.ingredients.map(i => i.emoji)))];
+  return Promise.all(all.map(em => new Promise(res => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => { emojiImgCache[em] = img; res(); };
+    img.onerror = res; // graceful fallback to canvas text
+    img.src = TWEMOJI_BASE + emojiToCP(em) + '.png';
+  })));
+}
+
+// ─────────────────────────────────────────────
+// WEB AUDIO SOUND SYSTEM
+// ─────────────────────────────────────────────
+let _audioCtx = null;
+let _ambientGain = null;
+
+function audioCtx() {
+  if (!_audioCtx) {
+    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return _audioCtx;
+}
+
+function playTone(freq, dur, type = 'sine', vol = 0.22, delay = 0) {
+  try {
+    const ctx = audioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + dur);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + dur + 0.05);
+  } catch (_) {}
+}
+
+function sfxCorrect() {
+  // Ascending chime: C5 → E5 → G5
+  playTone(523.25, 0.28, 'sine', 0.2,  0);
+  playTone(659.25, 0.28, 'sine', 0.2,  0.1);
+  playTone(783.99, 0.38, 'sine', 0.22, 0.2);
+}
+
+function sfxWrong() {
+  // Short descending buzz
+  playTone(260, 0.12, 'sawtooth', 0.08, 0);
+  playTone(200, 0.18, 'sawtooth', 0.06, 0.1);
+}
+
+function sfxComplete() {
+  // Victory fanfare: C5-E5-G5-C6
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) =>
+    playTone(f, 0.55, 'sine', 0.25, i * 0.13));
+}
+
+function sfxTick() {
+  playTone(880, 0.04, 'square', 0.04);
+}
+
+function startAmbient() {
+  try {
+    const ctx = audioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.032, ctx.currentTime + 2);
+    master.connect(ctx.destination);
+    // Low warm drone: C2 + G2 + E3
+    [65.41, 98.0, 164.81].forEach(freq => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      const vibLfo = ctx.createOscillator();
+      const vibGain = ctx.createGain();
+      vibLfo.frequency.setValueAtTime(0.18, ctx.currentTime);
+      vibGain.gain.setValueAtTime(0.3, ctx.currentTime);
+      vibLfo.connect(vibGain);
+      vibGain.connect(osc.frequency);
+      vibLfo.start();
+      osc.connect(master);
+      osc.start();
+    });
+    _ambientGain = master;
+  } catch (_) {}
+}
+
+function stopAmbient() {
+  if (_ambientGain && _audioCtx) {
+    _ambientGain.gain.linearRampToValueAtTime(0.0001, _audioCtx.currentTime + 1.5);
+  }
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+
+// Expose to window for HTML onclick handlers (module scope is isolated)
+window.startGame   = startGame;
+window.nextRound   = nextRound;
+window.restartGame = restartGame;
+
+preloadEmoji(); // fire-and-forget — done before user clicks Start
+initScene();
+</script>
+</body>
+</html>
