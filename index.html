@@ -403,6 +403,122 @@
       z-index: 1;
       background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.72) 100%);
     }
+
+    /* ══ MINI-GAME SYSTEM ══ */
+    #mg-hub {
+      background: radial-gradient(ellipse at 50% 60%, #0d1a2e 0%, #040a14 100%);
+      display: none;
+    }
+    #mg-hub.show { display: flex; }
+
+    .mg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 24px 0 28px;
+      width: 560px;
+      max-width: 92vw;
+    }
+    .mg-card {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(201,168,76,0.3);
+      border-radius: 8px;
+      padding: 20px 18px 16px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      text-align: left;
+    }
+    .mg-card:hover { background: rgba(201,168,76,0.1); border-color: #C9A84C; transform: translateY(-2px); }
+    .mg-card-icon { font-size: 30px; margin-bottom: 9px; }
+    .mg-card-name { font-size: 14px; color: #C9A84C; letter-spacing: 1px; margin-bottom: 5px; font-family: Georgia, serif; }
+    .mg-card-desc { font-size: 11px; color: rgba(255,255,255,0.42); letter-spacing: 0.5px; line-height: 1.6; }
+
+    #mg-result { background: rgba(8,8,16,0.94); display: none; }
+    #mg-result.show { display: flex; }
+    .mgr-icon  { font-size: 54px; margin-bottom: 6px; }
+    .mgr-title { font-size: 30px; color: #C9A84C; margin-bottom: 6px; }
+    .mgr-score { font-size: 76px; font-weight: bold; color: #fff; line-height: 1; margin: 6px 0; text-shadow: 0 0 40px rgba(201,168,76,0.45); }
+    .mgr-stats { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 2.2; margin-bottom: 26px; }
+    .mgr-stats strong { color: #C9A84C; }
+    .mg-btn-row { display: flex; gap: 14px; }
+
+    #sort-arena { position: fixed; inset: 0; z-index: 22; pointer-events: none; display: none; overflow: hidden; }
+    #sort-arena.active { display: block; }
+    .sort-item {
+      position: absolute;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      pointer-events: all;
+      user-select: none;
+      white-space: nowrap;
+      border: 1.5px solid rgba(201,168,76,0.4);
+      background: rgba(10,9,20,0.88);
+      color: #fff;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s;
+    }
+    .sort-item:hover { transform: scale(1.07); border-color: #C9A84C; }
+    .sort-item.hit-good { background: rgba(0,200,80,0.25); border-color: #00ff66; }
+    .sort-item.hit-bad  { background: rgba(255,50,50,0.25);  border-color: #ff4b4b; }
+
+    #mystery-options {
+      position: fixed;
+      bottom: 56px; left: 50%; transform: translateX(-50%);
+      z-index: 25;
+      display: none; gap: 10px; flex-wrap: wrap; justify-content: center;
+      max-width: 720px;
+    }
+    #mystery-options.show { display: flex; }
+    .mystery-btn {
+      background: rgba(10,9,20,0.88);
+      border: 1.5px solid rgba(201,168,76,0.4);
+      border-radius: 6px;
+      color: #C9A84C;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 11px 20px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .mystery-btn:hover:not(:disabled) { background: rgba(201,168,76,0.15); border-color: #C9A84C; }
+    .mystery-btn.wrong   { border-color: #ff4b4b !important; color: #ff4b4b !important; opacity: 0.5; }
+    .mystery-btn.correct { border-color: #00ff66 !important; color: #00ff66 !important; }
+    .mystery-btn:disabled { cursor: not-allowed; }
+
+    #mf-mem-bar {
+      position: fixed; bottom: 66px; left: 50%; transform: translateX(-50%);
+      z-index: 25; width: 340px; display: none; text-align: center;
+    }
+    #mf-mem-bar.show { display: block; }
+    #mf-mem-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(201,168,76,0.5); margin-bottom: 6px; }
+    #mf-mem-track { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+    #mf-mem-fill  { height: 100%; width: 100%; background: linear-gradient(90deg, #B8860B, #C9A84C, #FFA500); transform-origin: left; }
+
+    /* Main-game ingredient preview bar */
+    #preview-bar {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+      z-index: 30; width: 360px; display: none; text-align: center;
+      background: rgba(0,0,0,0.82); border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 10px; padding: 20px 24px; pointer-events: none;
+    }
+    #preview-bar.show { display: block; }
+    #preview-heading {
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(201,168,76,0.7); margin-bottom: 10px;
+    }
+    #preview-countdown {
+      font-size: 52px; font-weight: 900; color: #fff;
+      line-height: 1; margin-bottom: 12px;
+      text-shadow: 0 0 20px rgba(201,168,76,0.5);
+    }
+    #preview-track { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+    #preview-fill  { height: 100%; width: 100%; background: linear-gradient(90deg, #B8860B, #C9A84C, #FFA500); transform-origin: left; }
+
   </style>
 </head>
 <body>
@@ -450,6 +566,7 @@
   <div class="game-title">Hyatt Recipe<br><span>Challenge</span></div>
   <div class="game-subtitle">F&amp;B Staff Training</div>
   <button class="btn" onclick="startGame()">Start Challenge</button>
+  <button class="btn" onclick="mgOpenHub()" style="margin-top:12px;font-size:11px;padding:11px 40px;opacity:0.75;">Mini-Games &#9654;</button>
   <div class="dish-icons">&#127828; &#127829; &#127829; &#129380; &#127865;</div>
   <div class="how-to-play">
     5 recipes &bull; 60 seconds each &bull; select ingredients in order<br>
@@ -475,6 +592,69 @@
   <div class="rank-badge" id="go-rank"></div>
   <div id="go-results-table"></div>
   <button class="btn" onclick="restartGame()">Play Again</button>
+</div>
+
+<!-- Mini-Game Hub -->
+<div class="overlay" id="mg-hub">
+  <div class="brand-tag">Hyatt Hotels &amp; Resorts</div>
+  <div class="gold-rule"></div>
+  <div class="game-title" style="font-size:42px;">Recipe <span>Challenges</span></div>
+  <div class="game-subtitle">Choose Your Mini-Game</div>
+  <div class="mg-grid">
+    <div class="mg-card" onclick="mgLaunch('mf')">
+      <div class="mg-card-icon">&#129504;</div>
+      <div class="mg-card-name">Memory Flash</div>
+      <div class="mg-card-desc">Memorize the recipe order, then recall it from memory.</div>
+    </div>
+    <div class="mg-card" onclick="mgLaunch('match')">
+      <div class="mg-card-icon">&#127183;</div>
+      <div class="mg-card-name">Ingredient Match</div>
+      <div class="mg-card-desc">Flip cards to find all matching ingredient pairs.</div>
+    </div>
+    <div class="mg-card" onclick="mgLaunch('sort')">
+      <div class="mg-card-icon">&#9889;</div>
+      <div class="mg-card-name">Speed Sort</div>
+      <div class="mg-card-desc">Catch the right ingredients as they fall — avoid the decoys!</div>
+    </div>
+    <div class="mg-card" onclick="mgLaunch('mystery')">
+      <div class="mg-card-icon">&#128269;</div>
+      <div class="mg-card-name">Mystery Dish</div>
+      <div class="mg-card-desc">Guess the dish as ingredient clues are revealed one by one.</div>
+    </div>
+  </div>
+  <button class="btn" onclick="mgBackToTitle()">&#8592; Back</button>
+</div>
+
+<!-- Shared Mini-Game Result -->
+<div class="overlay" id="mg-result">
+  <div class="gold-rule"></div>
+  <div class="mgr-icon"  id="mgr-icon"></div>
+  <div class="mgr-title" id="mgr-title"></div>
+  <div class="mgr-score" id="mgr-score">0</div>
+  <div class="mgr-stats" id="mgr-stats"></div>
+  <div class="mg-btn-row">
+    <button class="btn" onclick="mgPlayAgain()">Play Again</button>
+    <button class="btn" onclick="mgGoHub()">&#8592; Hub</button>
+  </div>
+</div>
+
+<!-- Speed Sort falling items container -->
+<div id="sort-arena"></div>
+
+<!-- Mystery Dish option buttons -->
+<div id="mystery-options"></div>
+
+<!-- Main-game ingredient preview bar -->
+<div id="preview-bar">
+  <div id="preview-heading">Memorize the Ingredients!</div>
+  <div id="preview-countdown">4</div>
+  <div id="preview-track"><div id="preview-fill"></div></div>
+</div>
+
+<!-- Memory Flash memorize countdown bar -->
+<div id="mf-mem-bar">
+  <div id="mf-mem-label">Memorizing&hellip;</div>
+  <div id="mf-mem-track"><div id="mf-mem-fill"></div></div>
 </div>
 
 <script type="module">
@@ -579,6 +759,33 @@ const GS = {
   correct: 0,
   wrong: 0,
   dishResults: [],      // per-dish result objects
+};
+
+// ── Mini-Game state ──
+const MG = {
+  game:          null,   // 'mf' | 'match' | 'sort' | 'mystery'
+  score:         0,
+  timerHandle:   null,
+  timeLeft:      0,
+  // Memory Flash
+  mfDish:        null,
+  mfOrder:       [],
+  mfClicks:      0,
+  // Ingredient Match
+  matchCards:    [],
+  matchFlipped:  [],
+  matchLocked:   false,
+  matchPairs:    0,
+  // Speed Sort
+  sortDish:      null,
+  sortItems:     [],
+  sortSpawnHandle: null,
+  // Mystery Dish
+  mysteryDish:    null,
+  mysteryOptions: [],
+  mysteryCards:   [],
+  mysteryClueIdx: 0,
+  mysteryWrong:   0,
 };
 
 // ─────────────────────────────────────────────
@@ -1007,6 +1214,18 @@ function cardPositions(n) {
   }));
 }
 
+// 2-row layout for Ingredient Match (12 cards)
+function matchCardPositions(n) {
+  const cols  = Math.ceil(n / 2);
+  const xGap  = Math.min(2.1, 13.0 / Math.max(cols - 1, 1));
+  const totalW = (cols - 1) * xGap;
+  return Array.from({ length: n }, (_, i) => ({
+    x: (i % cols) * xGap - totalW / 2,
+    y: Math.floor(i / cols) === 0 ? 2.5 : -0.5,
+    z: 0,
+  }));
+}
+
 // ─────────────────────────────────────────────
 // DEAL CARDS
 // ─────────────────────────────────────────────
@@ -1221,7 +1440,14 @@ function confettiBurst(pos, color) {
 // HOVER & CLICK
 // ─────────────────────────────────────────────
 function updateHover() {
+  if (GS.phase === 'mg-mf-recall') { mgMfHover();    return; }
+  if (GS.phase === 'mg-match')     { mgMatchHover();  return; }
   if (GS.phase !== 'playing') {
+    if (hoveredCard) {
+      gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
+      hoveredCard.userData.frontMat.emissiveIntensity = 0;
+      hoveredCard = null;
+    }
     document.body.style.cursor = 'default';
     return;
   }
@@ -1255,6 +1481,9 @@ function updateHover() {
 }
 
 function handleClick() {
+  if (GS.phase === 'mg-mf-recall') { mgMfHandleClick();    return; }
+  if (GS.phase === 'mg-match')     { mgMatchHandleClick();  return; }
+  if (GS.phase === 'mg-sort' || GS.phase === 'mg-mystery') return;
   if (GS.phase !== 'playing') return;
   raycaster.setFromCamera(mouse, camera);
 
@@ -1288,14 +1517,65 @@ function startGame() {
   startRound();
 }
 
+function startPreview(dish) {
+  const PREVIEW_SECS = 4;
+  const n = GS.cards.length;
+  // Wait for the deal-in stagger to finish before revealing
+  const dealDelay = (n - 1) * 0.09 + 0.55 + 0.2;
+
+  setTimeout(() => {
+    // Flip all cards face-up so player can memorize
+    GS.cards.forEach((card, i) => {
+      gsap.to(card.rotation, { y: 0, duration: 0.4, delay: i * 0.07, ease: 'power2.inOut' });
+    });
+
+    // Show countdown bar
+    const bar      = document.getElementById('preview-bar');
+    const fill     = document.getElementById('preview-fill');
+    const countEl  = document.getElementById('preview-countdown');
+    bar.classList.add('show');
+    gsap.fromTo(fill, { scaleX: 1 }, { scaleX: 0, duration: PREVIEW_SECS, ease: 'linear' });
+
+    let secs = PREVIEW_SECS;
+    countEl.textContent = secs;
+    const countHandle = setInterval(() => {
+      secs--;
+      if (secs > 0) countEl.textContent = secs;
+    }, 1000);
+
+    // After preview, flip all cards back face-down
+    setTimeout(() => {
+      clearInterval(countHandle);
+      bar.classList.remove('show');
+
+      GS.cards.forEach((card, i) => {
+        gsap.to(card.rotation, { y: Math.PI, duration: 0.35, delay: i * 0.05, ease: 'power2.inOut' });
+      });
+
+      // Once cards are face-down, start the actual round
+      const flipBackMs = (n - 1) * 50 + 400;
+      setTimeout(() => {
+        if (GS.phase !== 'preview') return; // guard against restart/abort
+        GS.phase = 'playing';
+        clearInterval(GS.timerHandle);
+        GS.timerHandle = setInterval(tickTimer, 1000);
+        renderTimer();
+      }, flipBackMs);
+
+    }, PREVIEW_SECS * 1000);
+  }, dealDelay * 1000);
+}
+
 function startRound() {
   const dish = DISHES[GS.dishIdx];
+
+  document.getElementById('preview-bar').classList.remove('show'); // clear any lingering preview
 
   GS.nextIdx  = 0;
   GS.timeLeft = 60;
   GS.correct  = 0;
   GS.wrong    = 0;
-  GS.phase    = 'playing';
+  GS.phase    = 'preview'; // preview first; startPreview() switches to 'playing'
 
   document.getElementById('completed-strip').innerHTML = '';
   document.getElementById('dish-display').style.display = 'block';
@@ -1309,11 +1589,9 @@ function startRound() {
   document.getElementById('progress-fill').style.width = '0%';
   document.getElementById('progress-label').textContent = `0 of ${dish.ingredients.length}`;
 
+  clearInterval(GS.timerHandle); // stop any previous timer
   dealCards(dish);
-
-  clearInterval(GS.timerHandle);
-  GS.timerHandle = setInterval(tickTimer, 1000);
-  renderTimer();
+  startPreview(dish); // flips cards face-up, counts down, then starts timer
 }
 
 function pickIngredient(card) {
@@ -1631,6 +1909,629 @@ function showFeedback(text, color = '#C9A84C') {
   );
 }
 
+// ═══════════════════════════════════════════════
+// MINI-GAME SYSTEM
+// ═══════════════════════════════════════════════
+
+// ── Hub / navigation ──
+function mgOpenHub() {
+  document.getElementById('title-screen').style.display = 'none';
+  document.getElementById('mg-hub').classList.add('show');
+  GS.phase = 'hub';
+}
+
+function mgBackToTitle() {
+  document.getElementById('mg-hub').classList.remove('show');
+  document.getElementById('title-screen').style.display = 'flex';
+  GS.phase = 'title';
+}
+
+function mgLaunch(game) {
+  MG.game  = game;
+  MG.score = 0;
+  document.getElementById('mg-hub').classList.remove('show');
+  document.getElementById('mg-result').classList.remove('show');
+  mgCommonTeardown();
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('score-value').textContent = '0';
+  document.getElementById('round-value').textContent = 'Mini-Game';
+  document.getElementById('streak-mult').textContent = '';
+  if (game === 'mf')      mgMfStart();
+  else if (game === 'match')   mgMatchStart();
+  else if (game === 'sort')    mgSortStart();
+  else if (game === 'mystery') mgMysteryStart();
+}
+
+function mgPlayAgain() { mgLaunch(MG.game); }
+
+function mgGoHub() {
+  document.getElementById('mg-result').classList.remove('show');
+  mgCommonTeardown();
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('mg-hub').classList.add('show');
+  GS.phase = 'hub';
+}
+
+function mgCommonTeardown() {
+  clearInterval(MG.timerHandle);
+  clearTimeout(MG.sortSpawnHandle);
+  MG.sortSpawnHandle = null;
+  MG.sortItems.forEach(it => { it.tween && it.tween.kill(); it.el.remove(); });
+  MG.sortItems = [];
+  document.getElementById('sort-arena').classList.remove('active');
+  document.getElementById('sort-arena').innerHTML = '';
+  document.getElementById('mystery-options').classList.remove('show');
+  document.getElementById('mf-mem-bar').classList.remove('show');
+  document.getElementById('dish-display').style.display = 'none';
+  document.getElementById('completed-strip').innerHTML = '';
+  if (hoveredCard) {
+    hoveredCard.userData.frontMat && (hoveredCard.userData.frontMat.emissiveIntensity = 0);
+    hoveredCard.userData.backMat  && (hoveredCard.userData.backMat.emissiveIntensity  = 0);
+    hoveredCard = null;
+  }
+  purgeCards();
+}
+
+// ── Shared HUD/timer helpers ──
+function mgRefreshScore() {
+  const el = document.getElementById('score-value');
+  el.textContent = MG.score.toLocaleString();
+  el.classList.remove('score-pop');
+  void el.offsetWidth;
+  el.classList.add('score-pop');
+}
+
+function mgStartTimer(secs, onExpire) {
+  clearInterval(MG.timerHandle);
+  MG.timeLeft = secs;
+  mgTickTimer();
+  MG.timerHandle = setInterval(() => {
+    MG.timeLeft = Math.max(0, MG.timeLeft - 1);
+    mgTickTimer();
+    if (MG.timeLeft === 0) { clearInterval(MG.timerHandle); onExpire(); }
+  }, 1000);
+}
+
+function mgTickTimer() {
+  const el = document.getElementById('timer-value');
+  const m  = Math.floor(MG.timeLeft / 60);
+  const s  = MG.timeLeft % 60;
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  const urgent = MG.timeLeft <= 10 && MG.timeLeft > 0;
+  el.classList.toggle('urgent', urgent);
+  if (urgent) sfxTick();
+}
+
+function mgShowResult(icon, title, stats) {
+  GS.phase = 'mg-result';
+  clearInterval(MG.timerHandle);
+  clearTimeout(MG.sortSpawnHandle);
+  document.getElementById('hud').style.display          = 'none';
+  document.getElementById('dish-display').style.display = 'none';
+  document.getElementById('sort-arena').classList.remove('active');
+  document.getElementById('mystery-options').classList.remove('show');
+  document.getElementById('mf-mem-bar').classList.remove('show');
+
+  document.getElementById('mgr-icon').textContent  = icon;
+  document.getElementById('mgr-title').textContent = title;
+  document.getElementById('mgr-score').textContent = MG.score.toLocaleString();
+  document.getElementById('mgr-stats').innerHTML   = stats;
+  document.getElementById('mg-result').classList.add('show');
+  sfxComplete();
+  confettiBurst(new THREE.Vector3(0, 0.5, 0), 0xC9A84C);
+}
+
+// ── Shared hover helper (for face-down card games) ──
+function mgHoverFaceDown(cards, filterFn) {
+  raycaster.setFromCamera(mouse, camera);
+  const targets = cards.filter(filterFn);
+  const hits = raycaster.intersectObjects(targets, true);
+  let hit = null;
+  if (hits.length) {
+    let obj = hits[0].object;
+    while (obj && !obj.userData.ing) obj = obj.parent;
+    if (obj) hit = obj;
+  }
+  if (hit !== hoveredCard) {
+    if (hoveredCard) {
+      gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
+      if (hoveredCard.userData.backMat) hoveredCard.userData.backMat.emissiveIntensity = 0;
+    }
+    hoveredCard = hit;
+    if (hoveredCard) {
+      gsap.to(hoveredCard.scale, { x: 1.06, y: 1.06, z: 1.06, duration: 0.18 });
+      hoveredCard.userData.backMat.emissive.set(0xC9A84C);
+      hoveredCard.userData.backMat.emissiveIntensity = 0.22;
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'default';
+    }
+  }
+}
+
+// ════════════════════════════════════════════
+// 1. MEMORY FLASH
+// ════════════════════════════════════════════
+function mgMfStart() {
+  MG.mfDish   = DISHES[Math.floor(Math.random() * DISHES.length)];
+  MG.mfOrder  = [...MG.mfDish.ingredients];
+  MG.mfClicks = 0;
+  GS.phase = 'mg-mf-show';
+
+  document.getElementById('dish-display').style.display = 'block';
+  document.getElementById('dish-name').textContent        = MG.mfDish.emoji + ' ' + MG.mfDish.name;
+  document.getElementById('dish-instruction').textContent = 'Memorize the ingredient order!';
+  document.getElementById('progress-fill').style.width    = '100%';
+  document.getElementById('progress-label').textContent   = '';
+  document.getElementById('completed-strip').innerHTML    = '';
+  document.getElementById('mf-mem-bar').classList.add('show');
+
+  // Deal cards face-UP in correct order
+  const pos = cardPositions(MG.mfOrder.length);
+  MG.mfOrder.forEach((ing, i) => {
+    const card = createCard(ing);
+    card.position.set(pos[i].x, -9, pos[i].z);
+    card.rotation.y = 0;
+    scene.add(card);
+    GS.cards.push(card);
+    gsap.to(card.position, { y: pos[i].y, duration: 0.55, delay: i * 0.09, ease: 'back.out(1.3)' });
+    card.userData.frontMat.emissive.set(0x1a4aaa);
+    card.userData.frontMat.emissiveIntensity = 0.15;
+  });
+
+  // Animate memorize bar countdown (6s)
+  gsap.fromTo('#mf-mem-fill',
+    { scaleX: 1 },
+    { scaleX: 0, duration: 6, ease: 'none', delay: 0.8, onComplete: mgMfStartRecall }
+  );
+}
+
+function mgMfStartRecall() {
+  document.getElementById('mf-mem-bar').classList.remove('show');
+  document.getElementById('dish-instruction').textContent = 'Recall the order from memory!';
+  document.getElementById('progress-fill').style.width    = '0%';
+  document.getElementById('progress-label').textContent   = `0 of ${MG.mfOrder.length}`;
+  GS.cards.forEach(c => {
+    c.userData.frontMat.emissiveIntensity = 0;
+    c.userData.mfDone = false;
+  });
+
+  // Flip all face-down
+  GS.cards.forEach((c, i) =>
+    gsap.to(c.rotation, { y: Math.PI, duration: 0.4, delay: i * 0.07, ease: 'power2.inOut' })
+  );
+
+  // Shuffle to new positions
+  const n = GS.cards.length;
+  const shuffled = cardPositions(n).sort(() => Math.random() - 0.5);
+  GS.cards.forEach((c, i) =>
+    gsap.to(c.position, { x: shuffled[i].x, y: shuffled[i].y, duration: 0.55, delay: n * 0.07 + 0.3 + i * 0.05, ease: 'power2.inOut' })
+  );
+
+  const totalDelay = (n * 70 + 300 + n * 50 + 700);
+  setTimeout(() => {
+    GS.phase = 'mg-mf-recall';
+    showFeedback('Recall the order!', '#C9A84C');
+    mgStartTimer(30, () => {
+      showFeedback("Time's up!", '#ff4b4b');
+      setTimeout(mgMfEnd, 900);
+    });
+  }, totalDelay);
+}
+
+function mgMfHover() {
+  mgHoverFaceDown(GS.cards, c => !c.userData.mfDone && !c.userData.flipping);
+}
+
+function mgMfHandleClick() {
+  raycaster.setFromCamera(mouse, camera);
+  const targets = GS.cards.filter(c => !c.userData.mfDone && !c.userData.flipping);
+  const hits = raycaster.intersectObjects(targets, true);
+  if (!hits.length) return;
+  let card = hits[0].object;
+  while (card && !card.userData.ing) card = card.parent;
+  if (!card || card.userData.mfDone || card.userData.flipping) return;
+
+  const expected = MG.mfOrder[MG.mfClicks];
+  card.userData.flipping = true;
+
+  gsap.to(card.rotation, {
+    y: 0, duration: 0.35, ease: 'power2.inOut',
+    onComplete: () => {
+      card.userData.flipping = false;
+      if (card.userData.ing.name === expected.name) {
+        card.userData.mfDone = true;
+        if (hoveredCard === card) { hoveredCard = null; document.body.style.cursor = 'default'; }
+        card.userData.backMat.emissiveIntensity = 0;
+        card.userData.frontMat.emissive.set(0x00ee55);
+        card.userData.frontMat.emissiveIntensity = 0.22;
+        MG.mfClicks++;
+        MG.score += 150;
+        sfxCorrect();
+        burst(card.position.clone());
+        showFeedback(`+150  ${expected.name}!`, '#C9A84C');
+        mgRefreshScore();
+        const pct = MG.mfClicks / MG.mfOrder.length * 100;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-label').textContent = `${MG.mfClicks} of ${MG.mfOrder.length}`;
+        // Fly to tray
+        const spc = Math.min(1.6, 10.0 / Math.max(MG.mfOrder.length - 1, 1));
+        const tx  = (MG.mfClicks - 1 - (MG.mfOrder.length - 1) / 2) * spc;
+        gsap.to(card.position, { x: tx, y: -0.735, z: 3.8, duration: 0.55, delay: 0.08, ease: 'power3.inOut' });
+        if (MG.mfClicks >= MG.mfOrder.length) setTimeout(mgMfEnd, 700);
+      } else {
+        sfxWrong(); shakeCard(card);
+        showFeedback('Wrong order!', '#ff4b4b');
+        setTimeout(() => gsap.to(card.rotation, { y: Math.PI, duration: 0.35, ease: 'power2.inOut' }), 700);
+      }
+    },
+  });
+}
+
+function mgMfEnd() {
+  clearInterval(MG.timerHandle);
+  const total = MG.mfOrder.length;
+  mgShowResult(
+    MG.mfDish.emoji,
+    'Memory Flash',
+    `Dish: <strong>${MG.mfDish.name}</strong><br>` +
+    `Recalled: <strong>${MG.mfClicks} / ${total}</strong><br>` +
+    `Accuracy: <strong>${Math.round(MG.mfClicks / total * 100)}%</strong>`
+  );
+}
+
+// ════════════════════════════════════════════
+// 2. INGREDIENT MATCH
+// ════════════════════════════════════════════
+function mgMatchStart() {
+  const sixDishes = DISHES.filter(d => d.ingredients.length === 6);
+  MG.matchCards   = [];
+  MG.matchFlipped = [];
+  MG.matchLocked  = false;
+  MG.matchPairs   = 0;
+  const dish = sixDishes[Math.floor(Math.random() * sixDishes.length)];
+
+  document.getElementById('dish-display').style.display  = 'block';
+  document.getElementById('dish-name').textContent        = '🎯 Ingredient Match';
+  document.getElementById('dish-instruction').textContent = dish.name + ' — find all 6 pairs!';
+  document.getElementById('progress-fill').style.width    = '0%';
+  document.getElementById('progress-label').textContent   = '0 of 6 pairs';
+
+  // 12 cards: 6 pairs, shuffled
+  const pool = [...dish.ingredients, ...dish.ingredients];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  const pos = matchCardPositions(12);
+  pool.forEach((ing, i) => {
+    const card = createCard(ing);
+    card.userData.matched  = false;
+    card.userData.faceUp   = false;
+    card.position.set(pos[i].x, -9, pos[i].z);
+    card.rotation.y = Math.PI;
+    scene.add(card);
+    GS.cards.push(card);
+    MG.matchCards.push(card);
+    gsap.to(card.position, { y: pos[i].y, duration: 0.5, delay: i * 0.05, ease: 'back.out(1.2)' });
+  });
+
+  setTimeout(() => {
+    GS.phase = 'mg-match';
+    mgStartTimer(60, () => { showFeedback("Time's up!", '#ff4b4b'); setTimeout(mgMatchEnd, 900); });
+  }, 12 * 50 + 900);
+}
+
+function mgMatchHover() {
+  mgHoverFaceDown(MG.matchCards, c => !c.userData.matched && !c.userData.faceUp && !c.userData.flipping);
+}
+
+function mgMatchHandleClick() {
+  if (MG.matchLocked) return;
+  raycaster.setFromCamera(mouse, camera);
+  const targets = MG.matchCards.filter(c => !c.userData.matched && !c.userData.faceUp && !c.userData.flipping);
+  const hits = raycaster.intersectObjects(targets, true);
+  if (!hits.length) return;
+  let card = hits[0].object;
+  while (card && !card.userData.ing) card = card.parent;
+  if (!card || card.userData.matched || card.userData.faceUp || card.userData.flipping) return;
+
+  card.userData.faceUp   = true;
+  card.userData.flipping = true;
+  if (hoveredCard === card) { hoveredCard = null; document.body.style.cursor = 'default'; }
+  card.userData.backMat.emissiveIntensity = 0;
+
+  gsap.to(card.rotation, {
+    y: 0, duration: 0.35, ease: 'power2.inOut',
+    onComplete: () => { card.userData.flipping = false; },
+  });
+
+  MG.matchFlipped.push(card);
+
+  if (MG.matchFlipped.length === 2) {
+    MG.matchLocked = true;
+    const [a, b] = MG.matchFlipped;
+    MG.matchFlipped = [];
+
+    if (a.userData.ing.name === b.userData.ing.name) {
+      MG.matchPairs++;
+      MG.score += 100;
+      a.userData.matched = true;
+      b.userData.matched = true;
+      sfxCorrect();
+      [a, b].forEach(c => {
+        c.userData.frontMat.emissive.set(0x00ee55);
+        c.userData.frontMat.emissiveIntensity = 0.22;
+        burst(c.position.clone());
+      });
+      const pct = MG.matchPairs / 6 * 100;
+      document.getElementById('progress-fill').style.width    = pct + '%';
+      document.getElementById('progress-label').textContent   = `${MG.matchPairs} of 6 pairs`;
+      showFeedback(`+100  Match!`, '#C9A84C');
+      mgRefreshScore();
+      MG.matchLocked = false;
+      if (MG.matchPairs >= 6) setTimeout(mgMatchEnd, 700);
+    } else {
+      sfxWrong();
+      showFeedback('No match — try again!', '#ff4b4b');
+      setTimeout(() => {
+        [a, b].forEach(c => {
+          c.userData.faceUp   = false;
+          c.userData.flipping = true;
+          gsap.to(c.rotation, {
+            y: Math.PI, duration: 0.35, ease: 'power2.inOut',
+            onComplete: () => { c.userData.flipping = false; },
+          });
+        });
+        MG.matchLocked = false;
+      }, 950);
+    }
+  }
+}
+
+function mgMatchEnd() {
+  clearInterval(MG.timerHandle);
+  const timeBonus = MG.matchPairs >= 6 ? MG.timeLeft * 15 : 0;
+  MG.score += timeBonus;
+  mgShowResult(
+    '🎯',
+    MG.matchPairs >= 6 ? 'All Pairs Found!' : `${MG.matchPairs} / 6 Pairs`,
+    `Pairs matched: <strong>${MG.matchPairs} / 6</strong><br>` +
+    (timeBonus ? `Time bonus: <strong>+${timeBonus}</strong><br>` : '') +
+    `Total score: <strong>${MG.score.toLocaleString()}</strong>`
+  );
+}
+
+// ════════════════════════════════════════════
+// 3. SPEED SORT
+// ════════════════════════════════════════════
+function mgSortStart() {
+  MG.sortDish  = DISHES[Math.floor(Math.random() * DISHES.length)];
+  MG.sortItems = [];
+  GS.phase = 'mg-sort';
+
+  document.getElementById('dish-display').style.display  = 'block';
+  document.getElementById('dish-name').textContent        = MG.sortDish.emoji + ' ' + MG.sortDish.name;
+  document.getElementById('dish-instruction').textContent = 'Catch ONLY this dish\'s ingredients!';
+  document.getElementById('progress-fill').style.width    = '0%';
+  document.getElementById('progress-label').textContent   = 'Caught: 0';
+  document.getElementById('sort-arena').classList.add('active');
+
+  // Build ingredient pool (all dishes)
+  const allItems = [];
+  DISHES.forEach(d => {
+    d.ingredients.forEach(ing => {
+      allItems.push({ ing, isTarget: d === MG.sortDish });
+    });
+  });
+  allItems.sort(() => Math.random() - 0.5);
+  MG._sortPool = allItems;
+  MG._sortPoolIdx = 0;
+
+  mgSortSchedule();
+  mgStartTimer(45, () => {
+    GS.phase = 'mg-idle';
+    clearTimeout(MG.sortSpawnHandle);
+    MG.sortItems.forEach(it => { it.tween && it.tween.kill(); it.el.remove(); });
+    MG.sortItems = [];
+    setTimeout(mgSortEnd, 600);
+  });
+}
+
+function mgSortSchedule() {
+  if (GS.phase !== 'mg-sort') return;
+  const delay = 800 + Math.random() * 600;
+  MG.sortSpawnHandle = setTimeout(() => {
+    mgSortSpawnItem();
+    mgSortSchedule();
+  }, delay);
+}
+
+function mgSortSpawnItem() {
+  if (GS.phase !== 'mg-sort') return;
+
+  // ~40% targets, ~60% decoys — bias toward targets if pool is depleted
+  const targets = MG._sortPool.filter(x => x.isTarget);
+  const decoys  = MG._sortPool.filter(x => !x.isTarget);
+  const isTarget = Math.random() < 0.42;
+  const pool = isTarget ? targets : decoys;
+  if (!pool.length) return;
+  const item = pool[Math.floor(Math.random() * pool.length)];
+
+  const el = document.createElement('div');
+  el.className = 'sort-item';
+  el.textContent = item.ing.emoji + ' ' + item.ing.name;
+  el.style.left = (8 + Math.random() * 78) + '%';
+  el.style.top  = '-80px';
+  document.getElementById('sort-arena').appendChild(el);
+
+  const fallDur = 3.2 + Math.random() * 2.2;
+  const tween = gsap.to(el, {
+    top: (window.innerHeight + 80) + 'px',
+    duration: fallDur,
+    ease: 'none',
+    onComplete: () => {
+      el.remove();
+      MG.sortItems = MG.sortItems.filter(s => s.el !== el);
+    },
+  });
+
+  const entry = { el, tween, isTarget: item.isTarget };
+  MG.sortItems.push(entry);
+
+  el.addEventListener('click', () => {
+    if (!el.parentNode) return;
+    tween.kill();
+    const caught  = entry.isTarget;
+    MG.score += caught ? 75 : -25;
+    if (MG.score < 0) MG.score = 0;
+    el.classList.add(caught ? 'hit-good' : 'hit-bad');
+    caught ? sfxCorrect() : sfxWrong();
+    showFeedback(caught ? '+75  Good catch!' : '-25  Wrong!', caught ? '#C9A84C' : '#ff4b4b');
+    mgRefreshScore();
+
+    if (caught) {
+      const el2 = document.getElementById('progress-label');
+      const n   = parseInt(el2.textContent.replace('Caught: ', '') || '0') + 1;
+      el2.textContent = 'Caught: ' + n;
+      const pct = Math.min(100, n / MG.sortDish.ingredients.length * 100);
+      document.getElementById('progress-fill').style.width = pct + '%';
+    }
+
+    gsap.to(el, { opacity: 0, scale: 0.7, duration: 0.28, ease: 'power2.in',
+      onComplete: () => { el.remove(); MG.sortItems = MG.sortItems.filter(s => s.el !== el); } });
+  });
+}
+
+function mgSortEnd() {
+  mgShowResult(
+    MG.sortDish.emoji + ' ⚡',
+    'Speed Sort Complete!',
+    `Target dish: <strong>${MG.sortDish.name}</strong><br>` +
+    `Score: <strong>${MG.score.toLocaleString()}</strong>`
+  );
+}
+
+// ════════════════════════════════════════════
+// 4. MYSTERY DISH
+// ════════════════════════════════════════════
+const MYSTERY_PTS = [400, 300, 200, 100, 50, 50, 50];
+
+function mgMysteryStart() {
+  const shuffled       = [...DISHES].sort(() => Math.random() - 0.5);
+  MG.mysteryDish       = shuffled[0];
+  MG.mysteryOptions    = shuffled.slice(0, 4).sort(() => Math.random() - 0.5);
+  MG.mysteryCards      = [];
+  MG.mysteryClueIdx    = 0;
+  MG.mysteryWrong      = 0;
+  GS.phase = 'mg-mystery';
+
+  document.getElementById('dish-display').style.display  = 'block';
+  document.getElementById('dish-name').textContent        = '🔍 Mystery Dish';
+  document.getElementById('dish-instruction').textContent = 'Which dish do these ingredients belong to?';
+  document.getElementById('progress-fill').style.width    = '0%';
+  document.getElementById('progress-label').textContent   = '';
+
+  // Build option buttons
+  const optDiv = document.getElementById('mystery-options');
+  optDiv.innerHTML = '';
+  MG.mysteryOptions.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className   = 'mystery-btn';
+    btn.textContent = d.emoji + ' ' + d.name;
+    btn.dataset.dish = d.name;
+    btn.addEventListener('click', () => mgMysteryGuess(d.name));
+    optDiv.appendChild(btn);
+  });
+  optDiv.classList.add('show');
+
+  mgStartTimer(90, () => mgMysteryEnd(false));
+  setTimeout(mgMysteryReveal, 400);
+}
+
+function mgMysteryReveal() {
+  if (GS.phase !== 'mg-mystery') return;
+  const dish = MG.mysteryDish;
+  if (MG.mysteryClueIdx >= dish.ingredients.length) return;
+
+  const ing = dish.ingredients[MG.mysteryClueIdx];
+  MG.mysteryClueIdx++;
+
+  const n   = MG.mysteryClueIdx;
+  const pos = cardPositions(n);
+
+  // Create new card face-up
+  const card = createCard(ing);
+  card.position.set(pos[n - 1].x, -9, pos[n - 1].z);
+  card.rotation.y = 0;
+  scene.add(card);
+  GS.cards.push(card);
+  MG.mysteryCards.push(card);
+
+  // Reposition existing cards
+  MG.mysteryCards.slice(0, -1).forEach((c, i) =>
+    gsap.to(c.position, { x: pos[i].x, y: pos[i].y, duration: 0.4, ease: 'power2.inOut' })
+  );
+  gsap.to(card.position, { y: pos[n - 1].y, duration: 0.55, ease: 'back.out(1.3)' });
+
+  const pct = n / dish.ingredients.length * 100;
+  document.getElementById('progress-fill').style.width    = pct + '%';
+  document.getElementById('progress-label').textContent   = `Clue ${n} of ${dish.ingredients.length}`;
+
+  const pts = MYSTERY_PTS[Math.min(n - 1, MYSTERY_PTS.length - 1)];
+  document.getElementById('dish-instruction').textContent =
+    n < dish.ingredients.length
+      ? `Guess now for ${pts} pts — or wait for more clues`
+      : `Last clue! Guess for ${pts} pts`;
+}
+
+function mgMysteryGuess(dishName) {
+  if (GS.phase !== 'mg-mystery') return;
+  const correct = dishName === MG.mysteryDish.name;
+
+  document.querySelectorAll('.mystery-btn').forEach(btn => {
+    if (btn.dataset.dish === dishName) {
+      btn.classList.add(correct ? 'correct' : 'wrong');
+      btn.disabled = true;
+    }
+  });
+
+  if (correct) {
+    const pts = MYSTERY_PTS[Math.min(MG.mysteryClueIdx - 1, MYSTERY_PTS.length - 1)];
+    MG.score += pts;
+    sfxCorrect();
+    burst(new THREE.Vector3(0, 0, 0));
+    showFeedback(`+${pts}  Correct!`, '#C9A84C');
+    mgRefreshScore();
+    clearInterval(MG.timerHandle);
+    setTimeout(() => mgMysteryEnd(true), 1200);
+  } else {
+    MG.mysteryWrong++;
+    MG.score = Math.max(0, MG.score - 50);
+    sfxWrong();
+    showFeedback('-50  Wrong! Another clue...', '#ff4b4b');
+    mgRefreshScore();
+    setTimeout(() => {
+      if (MG.mysteryClueIdx < MG.mysteryDish.ingredients.length) mgMysteryReveal();
+      else mgMysteryEnd(false);
+    }, 900);
+  }
+}
+
+function mgMysteryEnd(won) {
+  clearInterval(MG.timerHandle);
+  document.getElementById('mystery-options').classList.remove('show');
+  mgShowResult(
+    MG.mysteryDish.emoji,
+    won ? 'Mystery Solved!' : 'Mystery Dish',
+    `Dish: <strong>${MG.mysteryDish.name}</strong><br>` +
+    `Clues used: <strong>${MG.mysteryClueIdx} of ${MG.mysteryDish.ingredients.length}</strong><br>` +
+    `Wrong guesses: <strong>${MG.mysteryWrong}</strong><br>` +
+    `Score: <strong>${MG.score.toLocaleString()}</strong>`
+  );
+}
+
 // ─────────────────────────────────────────────
 // RENDER LOOP
 // ─────────────────────────────────────────────
@@ -1755,9 +2656,16 @@ function stopAmbient() {
 // ─────────────────────────────────────────────
 
 // Expose to window for HTML onclick handlers (module scope is isolated)
-window.startGame   = startGame;
-window.nextRound   = nextRound;
-window.restartGame = restartGame;
+window.startGame     = startGame;
+window.nextRound     = nextRound;
+window.restartGame   = restartGame;
+// Mini-game hub
+window.mgOpenHub     = mgOpenHub;
+window.mgBackToTitle = mgBackToTitle;
+window.mgLaunch      = mgLaunch;
+window.mgPlayAgain   = mgPlayAgain;
+window.mgGoHub       = mgGoHub;
+window.mgMysteryGuess = mgMysteryGuess;
 
 preloadEmoji(); // fire-and-forget — done before user clicks Start
 initScene();
