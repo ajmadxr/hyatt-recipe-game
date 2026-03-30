@@ -419,6 +419,11 @@
       width: 560px;
       max-width: 92vw;
     }
+    .mg-grid .mg-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      max-width: 260px;
+      margin: 0 auto;
+    }
     .mg-card {
       background: rgba(255,255,255,0.04);
       border: 1.5px solid rgba(201,168,76,0.3);
@@ -446,23 +451,25 @@
     #sort-arena.active { display: block; }
     .sort-item {
       position: absolute;
-      padding: 10px 18px;
-      border-radius: 30px;
-      font-size: 16px;
-      font-family: Georgia, serif;
+      width: 88px;
+      border-radius: 6px;
       cursor: pointer;
       pointer-events: all;
       user-select: none;
-      white-space: nowrap;
-      border: 1.5px solid rgba(201,168,76,0.4);
-      background: rgba(10,9,20,0.88);
+      border: 1.5px solid rgba(201,168,76,0.35);
+      background: #1a1830;
       color: #fff;
-      letter-spacing: 0.5px;
-      transition: transform 0.1s;
+      text-align: center;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+      transition: transform 0.1s, box-shadow 0.1s;
     }
-    .sort-item:hover { transform: scale(1.07); border-color: #C9A84C; }
-    .sort-item.hit-good { background: rgba(0,200,80,0.25); border-color: #00ff66; }
-    .sort-item.hit-bad  { background: rgba(255,50,50,0.25);  border-color: #ff4b4b; }
+    .sort-item:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(201,168,76,0.3); border-color: #C9A84C; }
+    .sort-item-cat  { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 4px 3px; font-family: 'Courier New', monospace; }
+    .sort-item-emoji { font-size: 36px; line-height: 1; padding: 6px 0 4px; display: block; }
+    .sort-item-name { font-size: 9px; letter-spacing: 0.5px; font-family: Georgia, serif; padding: 0 4px 7px; line-height: 1.3; color: rgba(255,255,255,0.85); }
+    .sort-item.hit-good { outline: 2px solid #00ff66; background: rgba(0,200,80,0.2); }
+    .sort-item.hit-bad  { outline: 2px solid #ff4b4b; background: rgba(255,50,50,0.2); }
 
     #mystery-options {
       position: fixed;
@@ -490,14 +497,22 @@
     .mystery-btn.correct { border-color: #00ff66 !important; color: #00ff66 !important; }
     .mystery-btn:disabled { cursor: not-allowed; }
 
-    #mf-mem-bar {
-      position: fixed; bottom: 66px; left: 50%; transform: translateX(-50%);
-      z-index: 25; width: 340px; display: none; text-align: center;
+    /* What's Missing answer buttons */
+    #wm-options {
+      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+      z-index: 30; display: none; gap: 10px; flex-wrap: wrap;
+      justify-content: center; width: 600px; max-width: 96vw;
     }
-    #mf-mem-bar.show { display: block; }
-    #mf-mem-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(201,168,76,0.5); margin-bottom: 6px; }
-    #mf-mem-track { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-    #mf-mem-fill  { height: 100%; width: 100%; background: linear-gradient(90deg, #B8860B, #C9A84C, #FFA500); transform-origin: left; }
+    #wm-options.show { display: flex; }
+    .wm-btn {
+      background: rgba(255,255,255,0.05); border: 1.5px solid rgba(201,168,76,0.35);
+      border-radius: 6px; padding: 10px 18px; color: #fff; font-size: 12px;
+      letter-spacing: 1px; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+      font-family: Georgia, serif;
+    }
+    .wm-btn:hover { background: rgba(201,168,76,0.15); border-color: #C9A84C; }
+    .wm-btn.correct { background: rgba(0,200,80,0.25); border-color: #00ee55; }
+    .wm-btn.wrong   { background: rgba(255,50,50,0.25); border-color: #ff4b4b; }
 
     /* Main-game ingredient preview bar */
     #preview-bar {
@@ -601,25 +616,30 @@
   <div class="game-title" style="font-size:42px;">Recipe <span>Challenges</span></div>
   <div class="game-subtitle">Choose Your Mini-Game</div>
   <div class="mg-grid">
-    <div class="mg-card" onclick="mgLaunch('mf')">
-      <div class="mg-card-icon">&#129504;</div>
-      <div class="mg-card-name">Memory Flash</div>
-      <div class="mg-card-desc">Memorize the recipe order, then recall it from memory.</div>
+    <div class="mg-card" onclick="mgLaunch('oo')">
+      <div class="mg-card-icon">🤔</div>
+      <div class="mg-card-name">Odd One Out</div>
+      <div class="mg-card-desc">Spot the ingredient that doesn't belong to the dish.</div>
     </div>
     <div class="mg-card" onclick="mgLaunch('match')">
-      <div class="mg-card-icon">&#127183;</div>
+      <div class="mg-card-icon">🎯</div>
       <div class="mg-card-name">Ingredient Match</div>
       <div class="mg-card-desc">Flip cards to find all matching ingredient pairs.</div>
     </div>
     <div class="mg-card" onclick="mgLaunch('sort')">
-      <div class="mg-card-icon">&#9889;</div>
+      <div class="mg-card-icon">⚡</div>
       <div class="mg-card-name">Speed Sort</div>
       <div class="mg-card-desc">Catch the right ingredients as they fall — avoid the decoys!</div>
     </div>
     <div class="mg-card" onclick="mgLaunch('mystery')">
-      <div class="mg-card-icon">&#128269;</div>
+      <div class="mg-card-icon">🔍</div>
       <div class="mg-card-name">Mystery Dish</div>
       <div class="mg-card-desc">Guess the dish as ingredient clues are revealed one by one.</div>
+    </div>
+    <div class="mg-card" onclick="mgLaunch('wm')">
+      <div class="mg-card-icon">❓</div>
+      <div class="mg-card-name">What's Missing?</div>
+      <div class="mg-card-desc">One ingredient is hidden — can you name what's missing?</div>
     </div>
   </div>
   <button class="btn" onclick="mgBackToTitle()">&#8592; Back</button>
@@ -651,11 +671,8 @@
   <div id="preview-track"><div id="preview-fill"></div></div>
 </div>
 
-<!-- Memory Flash memorize countdown bar -->
-<div id="mf-mem-bar">
-  <div id="mf-mem-label">Memorizing&hellip;</div>
-  <div id="mf-mem-track"><div id="mf-mem-fill"></div></div>
-</div>
+<!-- What's Missing answer buttons -->
+<div id="wm-options"></div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -763,14 +780,22 @@ const GS = {
 
 // ── Mini-Game state ──
 const MG = {
-  game:          null,   // 'mf' | 'match' | 'sort' | 'mystery'
+  game:          null,   // 'oo' | 'match' | 'sort' | 'mystery' | 'wm'
   score:         0,
   timerHandle:   null,
   timeLeft:      0,
-  // Memory Flash
-  mfDish:        null,
-  mfOrder:       [],
-  mfClicks:      0,
+  // Odd One Out
+  ooDish:        null,
+  ooImpostor:    null,
+  ooRound:       0,
+  ooTotalRounds: 5,
+  ooCorrect:     0,
+  // What's Missing
+  wmDish:        null,
+  wmMissing:     null,
+  wmRound:       0,
+  wmTotalRounds: 5,
+  wmCorrect:     0,
   // Ingredient Match
   matchCards:    [],
   matchFlipped:  [],
@@ -1440,8 +1465,8 @@ function confettiBurst(pos, color) {
 // HOVER & CLICK
 // ─────────────────────────────────────────────
 function updateHover() {
-  if (GS.phase === 'mg-mf-recall') { mgMfHover();    return; }
-  if (GS.phase === 'mg-match')     { mgMatchHover();  return; }
+  if (GS.phase === 'mg-oo')    { mgOoHover();    return; }
+  if (GS.phase === 'mg-match') { mgMatchHover(); return; }
   if (GS.phase !== 'playing') {
     if (hoveredCard) {
       gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
@@ -1481,9 +1506,9 @@ function updateHover() {
 }
 
 function handleClick() {
-  if (GS.phase === 'mg-mf-recall') { mgMfHandleClick();    return; }
-  if (GS.phase === 'mg-match')     { mgMatchHandleClick();  return; }
-  if (GS.phase === 'mg-sort' || GS.phase === 'mg-mystery') return;
+  if (GS.phase === 'mg-oo')    { mgOoHandleClick();    return; }
+  if (GS.phase === 'mg-match') { mgMatchHandleClick(); return; }
+  if (GS.phase === 'mg-sort' || GS.phase === 'mg-mystery' || GS.phase === 'mg-wm') return;
   if (GS.phase !== 'playing') return;
   raycaster.setFromCamera(mouse, camera);
 
@@ -1936,10 +1961,11 @@ function mgLaunch(game) {
   document.getElementById('score-value').textContent = '0';
   document.getElementById('round-value').textContent = 'Mini-Game';
   document.getElementById('streak-mult').textContent = '';
-  if (game === 'mf')      mgMfStart();
+  if      (game === 'oo')      { MG.ooRound = 0; MG.ooCorrect = 0; mgOoNextRound(); }
   else if (game === 'match')   mgMatchStart();
   else if (game === 'sort')    mgSortStart();
   else if (game === 'mystery') mgMysteryStart();
+  else if (game === 'wm')      { MG.wmRound = 0; MG.wmCorrect = 0; mgWmNextRound(); }
 }
 
 function mgPlayAgain() { mgLaunch(MG.game); }
@@ -1961,7 +1987,8 @@ function mgCommonTeardown() {
   document.getElementById('sort-arena').classList.remove('active');
   document.getElementById('sort-arena').innerHTML = '';
   document.getElementById('mystery-options').classList.remove('show');
-  document.getElementById('mf-mem-bar').classList.remove('show');
+  document.getElementById('wm-options').classList.remove('show');
+  document.getElementById('wm-options').innerHTML = '';
   document.getElementById('dish-display').style.display = 'none';
   document.getElementById('completed-strip').innerHTML = '';
   if (hoveredCard) {
@@ -2010,7 +2037,7 @@ function mgShowResult(icon, title, stats) {
   document.getElementById('dish-display').style.display = 'none';
   document.getElementById('sort-arena').classList.remove('active');
   document.getElementById('mystery-options').classList.remove('show');
-  document.getElementById('mf-mem-bar').classList.remove('show');
+  document.getElementById('wm-options').classList.remove('show');
 
   document.getElementById('mgr-icon').textContent  = icon;
   document.getElementById('mgr-title').textContent = title;
@@ -2050,133 +2077,132 @@ function mgHoverFaceDown(cards, filterFn) {
 }
 
 // ════════════════════════════════════════════
-// 1. MEMORY FLASH
+// 1. ODD ONE OUT
 // ════════════════════════════════════════════
-function mgMfStart() {
-  MG.mfDish   = DISHES[Math.floor(Math.random() * DISHES.length)];
-  MG.mfOrder  = [...MG.mfDish.ingredients];
-  MG.mfClicks = 0;
-  GS.phase = 'mg-mf-show';
+function mgOoNextRound() {
+  if (MG.ooRound >= MG.ooTotalRounds) { mgOoEnd(); return; }
+  MG.ooRound++;
+
+  // Pick a random dish
+  MG.ooDish = DISHES[Math.floor(Math.random() * DISHES.length)];
+
+  // Pick an impostor from a different dish (no name overlap)
+  const dishNames = new Set(MG.ooDish.ingredients.map(i => i.name));
+  const pool = DISHES.filter(d => d !== MG.ooDish)
+    .flatMap(d => d.ingredients)
+    .filter(i => !dishNames.has(i.name));
+  MG.ooImpostor = pool[Math.floor(Math.random() * pool.length)];
+
+  GS.phase = 'mg-oo';
 
   document.getElementById('dish-display').style.display = 'block';
-  document.getElementById('dish-name').textContent        = MG.mfDish.emoji + ' ' + MG.mfDish.name;
-  document.getElementById('dish-instruction').textContent = 'Memorize the ingredient order!';
-  document.getElementById('progress-fill').style.width    = '100%';
-  document.getElementById('progress-label').textContent   = '';
+  document.getElementById('dish-name').textContent        = MG.ooDish.emoji + ' ' + MG.ooDish.name;
+  document.getElementById('dish-instruction').textContent = 'Spot the ingredient that doesn\'t belong!';
+  document.getElementById('progress-fill').style.width    = `${((MG.ooRound - 1) / MG.ooTotalRounds) * 100}%`;
+  document.getElementById('progress-label').textContent   = `Round ${MG.ooRound} of ${MG.ooTotalRounds}`;
   document.getElementById('completed-strip').innerHTML    = '';
-  document.getElementById('mf-mem-bar').classList.add('show');
 
-  // Deal cards face-UP in correct order
-  const pos = cardPositions(MG.mfOrder.length);
-  MG.mfOrder.forEach((ing, i) => {
+  // Build card list: dish ingredients + 1 impostor, shuffled
+  const allIngs = [...MG.ooDish.ingredients, MG.ooImpostor]
+    .sort(() => Math.random() - 0.5);
+
+  purgeCards();
+  const pos = cardPositions(allIngs.length);
+  allIngs.forEach((ing, i) => {
     const card = createCard(ing);
     card.position.set(pos[i].x, -9, pos[i].z);
-    card.rotation.y = 0;
+    card.rotation.y = 0; // face-up
+    card.userData.isImpostor = (ing === MG.ooImpostor);
     scene.add(card);
     GS.cards.push(card);
     gsap.to(card.position, { y: pos[i].y, duration: 0.55, delay: i * 0.09, ease: 'back.out(1.3)' });
-    card.userData.frontMat.emissive.set(0x1a4aaa);
-    card.userData.frontMat.emissiveIntensity = 0.15;
   });
 
-  // Animate memorize bar countdown (6s)
-  gsap.fromTo('#mf-mem-fill',
-    { scaleX: 1 },
-    { scaleX: 0, duration: 6, ease: 'none', delay: 0.8, onComplete: mgMfStartRecall }
-  );
-}
-
-function mgMfStartRecall() {
-  document.getElementById('mf-mem-bar').classList.remove('show');
-  document.getElementById('dish-instruction').textContent = 'Recall the order from memory!';
-  document.getElementById('progress-fill').style.width    = '0%';
-  document.getElementById('progress-label').textContent   = `0 of ${MG.mfOrder.length}`;
-  GS.cards.forEach(c => {
-    c.userData.frontMat.emissiveIntensity = 0;
-    c.userData.mfDone = false;
+  mgStartTimer(15, () => {
+    if (GS.phase !== 'mg-oo') return;
+    sfxWrong();
+    showFeedback("Time's up!", '#ff4b4b');
+    mgOoReveal(null);
   });
-
-  // Flip all face-down
-  GS.cards.forEach((c, i) =>
-    gsap.to(c.rotation, { y: Math.PI, duration: 0.4, delay: i * 0.07, ease: 'power2.inOut' })
-  );
-
-  // Shuffle to new positions
-  const n = GS.cards.length;
-  const shuffled = cardPositions(n).sort(() => Math.random() - 0.5);
-  GS.cards.forEach((c, i) =>
-    gsap.to(c.position, { x: shuffled[i].x, y: shuffled[i].y, duration: 0.55, delay: n * 0.07 + 0.3 + i * 0.05, ease: 'power2.inOut' })
-  );
-
-  const totalDelay = (n * 70 + 300 + n * 50 + 700);
-  setTimeout(() => {
-    GS.phase = 'mg-mf-recall';
-    showFeedback('Recall the order!', '#C9A84C');
-    mgStartTimer(30, () => {
-      showFeedback("Time's up!", '#ff4b4b');
-      setTimeout(mgMfEnd, 900);
-    });
-  }, totalDelay);
 }
 
-function mgMfHover() {
-  mgHoverFaceDown(GS.cards, c => !c.userData.mfDone && !c.userData.flipping);
-}
-
-function mgMfHandleClick() {
+function mgOoHover() {
   raycaster.setFromCamera(mouse, camera);
-  const targets = GS.cards.filter(c => !c.userData.mfDone && !c.userData.flipping);
+  const targets = GS.cards.filter(c => !c.userData.ooDone);
+  const hits = raycaster.intersectObjects(targets, true);
+  let hit = null;
+  if (hits.length) {
+    let obj = hits[0].object;
+    while (obj && !obj.userData.ing) obj = obj.parent;
+    if (obj && obj.userData.ing) hit = obj;
+  }
+  if (hit !== hoveredCard) {
+    if (hoveredCard && !hoveredCard.userData.ooDone) {
+      gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
+      hoveredCard.userData.frontMat.emissiveIntensity = 0;
+    }
+    hoveredCard = hit;
+    if (hoveredCard) {
+      gsap.to(hoveredCard.scale, { x: 1.06, y: 1.06, z: 1.06, duration: 0.18 });
+      hoveredCard.userData.frontMat.emissive.set(0xC9A84C);
+      hoveredCard.userData.frontMat.emissiveIntensity = 0.2;
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'default';
+    }
+  }
+}
+
+function mgOoHandleClick() {
+  raycaster.setFromCamera(mouse, camera);
+  const targets = GS.cards.filter(c => !c.userData.ooDone);
   const hits = raycaster.intersectObjects(targets, true);
   if (!hits.length) return;
   let card = hits[0].object;
   while (card && !card.userData.ing) card = card.parent;
-  if (!card || card.userData.mfDone || card.userData.flipping) return;
+  if (!card || card.userData.ooDone) return;
 
-  const expected = MG.mfOrder[MG.mfClicks];
-  card.userData.flipping = true;
+  GS.phase = 'mg-oo-result';
+  clearInterval(MG.timerHandle);
 
-  gsap.to(card.rotation, {
-    y: 0, duration: 0.35, ease: 'power2.inOut',
-    onComplete: () => {
-      card.userData.flipping = false;
-      if (card.userData.ing.name === expected.name) {
-        card.userData.mfDone = true;
-        if (hoveredCard === card) { hoveredCard = null; document.body.style.cursor = 'default'; }
-        card.userData.backMat.emissiveIntensity = 0;
-        card.userData.frontMat.emissive.set(0x00ee55);
-        card.userData.frontMat.emissiveIntensity = 0.22;
-        MG.mfClicks++;
-        MG.score += 150;
-        sfxCorrect();
-        burst(card.position.clone());
-        showFeedback(`+150  ${expected.name}!`, '#C9A84C');
-        mgRefreshScore();
-        const pct = MG.mfClicks / MG.mfOrder.length * 100;
-        document.getElementById('progress-fill').style.width = pct + '%';
-        document.getElementById('progress-label').textContent = `${MG.mfClicks} of ${MG.mfOrder.length}`;
-        // Fly to tray
-        const spc = Math.min(1.6, 10.0 / Math.max(MG.mfOrder.length - 1, 1));
-        const tx  = (MG.mfClicks - 1 - (MG.mfOrder.length - 1) / 2) * spc;
-        gsap.to(card.position, { x: tx, y: -0.735, z: 3.8, duration: 0.55, delay: 0.08, ease: 'power3.inOut' });
-        if (MG.mfClicks >= MG.mfOrder.length) setTimeout(mgMfEnd, 700);
-      } else {
-        sfxWrong(); shakeCard(card);
-        showFeedback('Wrong order!', '#ff4b4b');
-        setTimeout(() => gsap.to(card.rotation, { y: Math.PI, duration: 0.35, ease: 'power2.inOut' }), 700);
-      }
-    },
-  });
+  if (card.userData.isImpostor) {
+    const pts = 100 + MG.timeLeft * 10;
+    MG.score += pts;
+    MG.ooCorrect++;
+    sfxCorrect();
+    burst(card.position.clone());
+    card.userData.frontMat.emissive.set(0x00ee55);
+    card.userData.frontMat.emissiveIntensity = 0.4;
+    showFeedback(`+${pts}  Correct!`, '#C9A84C');
+    mgRefreshScore();
+  } else {
+    sfxWrong();
+    card.userData.frontMat.emissive.set(0xff2222);
+    card.userData.frontMat.emissiveIntensity = 0.4;
+    mgOoReveal(card);
+    return;
+  }
+  setTimeout(mgOoNextRound, 1600);
 }
 
-function mgMfEnd() {
-  clearInterval(MG.timerHandle);
-  const total = MG.mfOrder.length;
+function mgOoReveal(wrongCard) {
+  // Highlight the actual impostor in green
+  const impCard = GS.cards.find(c => c.userData.isImpostor);
+  if (impCard) {
+    impCard.userData.frontMat.emissive.set(0x00ee55);
+    impCard.userData.frontMat.emissiveIntensity = 0.4;
+  }
+  if (wrongCard) showFeedback('Wrong! The impostor was: ' + MG.ooImpostor.name, '#ff4b4b');
+  GS.phase = 'mg-oo-result';
+  setTimeout(mgOoNextRound, 2000);
+}
+
+function mgOoEnd() {
   mgShowResult(
-    MG.mfDish.emoji,
-    'Memory Flash',
-    `Dish: <strong>${MG.mfDish.name}</strong><br>` +
-    `Recalled: <strong>${MG.mfClicks} / ${total}</strong><br>` +
-    `Accuracy: <strong>${Math.round(MG.mfClicks / total * 100)}%</strong>`
+    '🤔',
+    'Odd One Out',
+    `Correct: <strong>${MG.ooCorrect} / ${MG.ooTotalRounds}</strong><br>` +
+    `Score: <strong>${MG.score.toLocaleString()}</strong>`
   );
 }
 
@@ -2359,16 +2385,26 @@ function mgSortSpawnItem() {
   if (!pool.length) return;
   const item = pool[Math.floor(Math.random() * pool.length)];
 
+  const col = CAT_COLORS[item.ing.cat] || CAT_COLORS.base;
   const el = document.createElement('div');
   el.className = 'sort-item';
-  el.textContent = item.ing.emoji + ' ' + item.ing.name;
-  el.style.left = (8 + Math.random() * 78) + '%';
-  el.style.top  = '-80px';
+  el.style.background = col.bg;
+  el.style.borderColor = col.accent + '88';
+  el.innerHTML =
+    `<div class="sort-item-cat" style="background:${col.accent}22;color:${col.accent}">${item.ing.cat || ''}</div>` +
+    `<span class="sort-item-emoji">${item.ing.emoji}</span>` +
+    `<div class="sort-item-name">${item.ing.name}</div>`;
+  el.style.left = (6 + Math.random() * 76) + '%';
+  el.style.top  = '-130px';
   document.getElementById('sort-arena').appendChild(el);
 
-  const fallDur = 3.2 + Math.random() * 2.2;
+  const fallDur = 5.5 + Math.random() * 3.0;
+  const startRot = (Math.random() - 0.5) * 18;
+  const endRot   = startRot + (Math.random() - 0.5) * 12;
+  el.style.transform = `rotate(${startRot}deg)`;
   const tween = gsap.to(el, {
-    top: (window.innerHeight + 80) + 'px',
+    top: (window.innerHeight + 140) + 'px',
+    rotation: endRot,
     duration: fallDur,
     ease: 'none',
     onComplete: () => {
@@ -2409,6 +2445,124 @@ function mgSortEnd() {
     MG.sortDish.emoji + ' ⚡',
     'Speed Sort Complete!',
     `Target dish: <strong>${MG.sortDish.name}</strong><br>` +
+    `Score: <strong>${MG.score.toLocaleString()}</strong>`
+  );
+}
+
+// ════════════════════════════════════════════
+// 5. WHAT'S MISSING?
+// ════════════════════════════════════════════
+function mgWmNextRound() {
+  if (MG.wmRound >= MG.wmTotalRounds) { mgWmEnd(); return; }
+  MG.wmRound++;
+
+  // Pick a dish with at least 3 ingredients
+  const eligible = DISHES.filter(d => d.ingredients.length >= 3);
+  MG.wmDish = eligible[Math.floor(Math.random() * eligible.length)];
+
+  // Pick one ingredient to hide
+  const hiddenIdx = Math.floor(Math.random() * MG.wmDish.ingredients.length);
+  MG.wmMissing = MG.wmDish.ingredients[hiddenIdx];
+  const visible = MG.wmDish.ingredients.filter((_, i) => i !== hiddenIdx);
+
+  GS.phase = 'mg-wm';
+
+  document.getElementById('dish-display').style.display = 'block';
+  document.getElementById('dish-name').textContent        = MG.wmDish.emoji + ' ' + MG.wmDish.name;
+  document.getElementById('dish-instruction').textContent = 'Which ingredient is missing from this dish?';
+  document.getElementById('progress-fill').style.width    = `${((MG.wmRound - 1) / MG.wmTotalRounds) * 100}%`;
+  document.getElementById('progress-label').textContent   = `Round ${MG.wmRound} of ${MG.wmTotalRounds}`;
+  document.getElementById('completed-strip').innerHTML    = '';
+
+  // Show visible ingredients face-up
+  purgeCards();
+  const pos = cardPositions(visible.length);
+  visible.forEach((ing, i) => {
+    const card = createCard(ing);
+    card.position.set(pos[i].x, -9, pos[i].z);
+    card.rotation.y = 0;
+    scene.add(card);
+    GS.cards.push(card);
+    gsap.to(card.position, { y: pos[i].y, duration: 0.55, delay: i * 0.09, ease: 'back.out(1.3)' });
+  });
+
+  // Build answer choices: correct + 3 decoys from other dishes
+  const decoyPool = DISHES.filter(d => d !== MG.wmDish)
+    .flatMap(d => d.ingredients)
+    .filter(i => i.name !== MG.wmMissing.name);
+  const decoys = decoyPool
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+  const choices = [MG.wmMissing, ...decoys].sort(() => Math.random() - 0.5);
+
+  // Render buttons
+  const container = document.getElementById('wm-options');
+  container.innerHTML = '';
+  choices.forEach(ing => {
+    const btn = document.createElement('button');
+    btn.className = 'wm-btn';
+    btn.textContent = ing.name;
+    btn.onclick = () => mgWmGuess(ing.name, btn, container);
+    container.appendChild(btn);
+  });
+  container.classList.add('show');
+
+  mgStartTimer(15, () => {
+    if (GS.phase !== 'mg-wm') return;
+    sfxWrong();
+    showFeedback("Time's up!", '#ff4b4b');
+    mgWmReveal(null, container);
+  });
+}
+
+function mgWmGuess(name, btn, container) {
+  if (GS.phase !== 'mg-wm') return;
+  GS.phase = 'mg-wm-result';
+  clearInterval(MG.timerHandle);
+
+  // Disable all buttons
+  container.querySelectorAll('.wm-btn').forEach(b => b.onclick = null);
+
+  if (name === MG.wmMissing.name) {
+    const pts = 100 + MG.timeLeft * 10;
+    MG.score += pts;
+    MG.wmCorrect++;
+    sfxCorrect();
+    btn.classList.add('correct');
+    showFeedback(`+${pts}  Correct!`, '#C9A84C');
+    mgRefreshScore();
+  } else {
+    sfxWrong();
+    btn.classList.add('wrong');
+    // Highlight the right answer
+    container.querySelectorAll('.wm-btn').forEach(b => {
+      if (b.textContent === MG.wmMissing.name) b.classList.add('correct');
+    });
+    showFeedback('Not quite! The missing ingredient was: ' + MG.wmMissing.name, '#ff4b4b');
+  }
+  setTimeout(() => {
+    container.classList.remove('show');
+    mgWmNextRound();
+  }, 1800);
+}
+
+function mgWmReveal(btn, container) {
+  GS.phase = 'mg-wm-result';
+  container.querySelectorAll('.wm-btn').forEach(b => {
+    b.onclick = null;
+    if (b.textContent === MG.wmMissing.name) b.classList.add('correct');
+  });
+  setTimeout(() => {
+    container.classList.remove('show');
+    mgWmNextRound();
+  }, 2000);
+}
+
+function mgWmEnd() {
+  mgShowResult(
+    '❓',
+    "What's Missing?",
+    `Correct: <strong>${MG.wmCorrect} / ${MG.wmTotalRounds}</strong><br>` +
     `Score: <strong>${MG.score.toLocaleString()}</strong>`
   );
 }
