@@ -363,6 +363,32 @@
     /* ── Cursor ── */
     body.can-select { cursor: pointer; }
 
+    /* ── HUD back button ── */
+    #hud-back-btn {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 21;
+      background: transparent;
+      border: 1px solid rgba(201, 168, 76, 0.3);
+      color: rgba(201, 168, 76, 0.45);
+      font-family: 'Georgia', serif;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 6px 20px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: border-color 0.2s, color 0.2s;
+      display: none;
+      pointer-events: all;
+    }
+    #hud-back-btn:hover {
+      border-color: rgba(201, 168, 76, 0.7);
+      color: rgba(201, 168, 76, 0.85);
+    }
+
     /* ── Completed ingredient badges ── */
     #completed-strip {
       position: fixed;
@@ -534,12 +560,134 @@
     #preview-track { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
     #preview-fill  { height: 100%; width: 100%; background: linear-gradient(90deg, #B8860B, #C9A84C, #FFA500); transform-origin: left; }
 
+    /* ── Ingredient tooltip ── */
+    #ingredient-tooltip {
+      position: fixed;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      background: rgba(10, 9, 20, 0.92);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      border-radius: 8px;
+      padding: 10px 20px;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      max-width: 420px;
+      width: max-content;
+    }
+    #ingredient-tooltip .tt-name {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: #C9A84C;
+      margin-bottom: 4px;
+    }
+    #ingredient-tooltip .tt-desc {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.65);
+      letter-spacing: 0.4px;
+      line-height: 1.6;
+    }
+
+    /* ── Round-end ingredient notes ── */
+    #re-ingredients {
+      width: 480px;
+      max-width: 90vw;
+      max-height: 180px;
+      overflow-y: auto;
+      margin: 0 0 20px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201,168,76,0.3) transparent;
+    }
+    .re-ing-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 6px 10px;
+      border-radius: 5px;
+      margin-bottom: 4px;
+      background: rgba(255,255,255,0.03);
+      border-left: 2px solid rgba(201,168,76,0.3);
+      text-align: left;
+    }
+    .re-ing-emoji { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+    .re-ing-text  { flex: 1; }
+    .re-ing-name  { font-size: 12px; color: #C9A84C; letter-spacing: 0.8px; margin-bottom: 2px; }
+    .re-ing-desc  { font-size: 10px; color: rgba(255,255,255,0.5); line-height: 1.5; letter-spacing: 0.3px; }
+
+    /* ── Mute button ── */
+    #mute-btn {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 200;
+      background: rgba(10, 9, 20, 0.78);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      border-radius: 6px;
+      color: #C9A84C;
+      font-size: 18px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #mute-btn:hover {
+      background: rgba(201, 168, 76, 0.15);
+      border-color: #C9A84C;
+    }
+
+    /* ── Difficulty selector ── */
+    .diff-selector {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .diff-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(201, 168, 76, 0.5);
+      margin-bottom: 10px;
+    }
+    .diff-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .diff-btn {
+      background: transparent;
+      border: 1px solid rgba(201, 168, 76, 0.35);
+      color: rgba(201, 168, 76, 0.5);
+      font-family: 'Georgia', serif;
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 8px 22px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .diff-btn:hover {
+      border-color: rgba(201, 168, 76, 0.7);
+      color: rgba(201, 168, 76, 0.8);
+    }
+    .diff-btn.active {
+      background: rgba(201, 168, 76, 0.15);
+      border-color: #C9A84C;
+      color: #C9A84C;
+    }
+
   </style>
 </head>
 <body>
 
 <div id="canvas-container"></div>
 <div id="vignette"></div>
+<button id="mute-btn" onclick="toggleMute()" title="Toggle Sound">🔊</button>
 
 <!-- HUD -->
 <div id="hud">
@@ -557,6 +705,7 @@
     <div class="hud-value" id="timer-value">1:00</div>
   </div>
 </div>
+<div id="ingredient-tooltip"><div class="tt-name"></div><div class="tt-desc"></div></div>
 
 <!-- Dish display -->
 <div id="dish-display">
@@ -580,33 +729,21 @@
   <div class="gold-rule"></div>
   <div class="game-title">Hyatt Recipe<br><span>Challenge</span></div>
   <div class="game-subtitle">F&amp;B Staff Training</div>
-  <button class="btn" onclick="startGame()">Start Challenge</button>
-  <button class="btn" onclick="mgOpenHub()" style="margin-top:12px;font-size:11px;padding:11px 40px;opacity:0.75;">Mini-Games &#9654;</button>
-  <div class="dish-icons">&#127828; &#127829; &#127829; &#129380; &#127865;</div>
-  <div class="how-to-play">
-    5 recipes &bull; 60 seconds each &bull; select ingredients in order<br>
-    Streak bonuses: x2 at 3 correct &bull; x3 at 6 correct in a row
+  <div class="diff-selector">
+    <div class="diff-label">Difficulty</div>
+    <div class="diff-btns">
+      <button class="diff-btn" data-diff="easy"   onclick="setDiff('easy')">Easy</button>
+      <button class="diff-btn active" data-diff="medium" onclick="setDiff('medium')">Medium</button>
+      <button class="diff-btn" data-diff="hard"   onclick="setDiff('hard')">Hard</button>
+    </div>
   </div>
-</div>
-
-<!-- Round end -->
-<div class="overlay" id="round-end">
-  <div class="round-dish-emoji" id="re-emoji"></div>
-  <div class="round-title" id="re-title">Dish Complete!</div>
-  <div class="stat-row" id="re-stats"></div>
-  <button class="btn" id="next-dish-btn" onclick="nextRound()">Next Dish &rarr;</button>
-  <div style="font-size:10px;color:rgba(201,168,76,0.3);margin-top:18px;letter-spacing:2px;" id="auto-advance-label"></div>
-</div>
-
-<!-- Game over / Results -->
-<div class="overlay" id="game-over">
-  <div class="brand-tag">Challenge Complete</div>
-  <div class="gold-rule"></div>
-  <div class="go-recipes-line">Recipes mastered: <strong id="go-recipes-num">0</strong> / 5</div>
-  <div class="final-score-num" id="go-score">0</div>
-  <div class="rank-badge" id="go-rank"></div>
-  <div id="go-results-table"></div>
-  <button class="btn" onclick="restartGame()">Play Again</button>
+  <button class="btn" onclick="mgOpenHub()">Start Mini Games &#9654;</button>
+  <div class="dish-icons">&#127828; &#129367; &#127829; &#129380; &#127865;</div>
+  <div class="how-to-play" id="how-to-play">
+    6 Mini-Games &bull; Test Your F&amp;B Recipe Knowledge<br>
+    Odd One Out &bull; Ingredient Match &bull; Speed Sort<br>
+    Mystery Dish &bull; What's Missing? &bull; Memory Flash
+  </div>
 </div>
 
 <!-- Mini-Game Hub -->
@@ -640,6 +777,11 @@
       <div class="mg-card-icon">❓</div>
       <div class="mg-card-name">What's Missing?</div>
       <div class="mg-card-desc">One ingredient is hidden — can you name what's missing?</div>
+    </div>
+    <div class="mg-card" onclick="mgLaunch('mf')">
+      <div class="mg-card-icon">🧠</div>
+      <div class="mg-card-name">Memory Flash</div>
+      <div class="mg-card-desc">Memorize the ingredient order in a flash, then recall it perfectly!</div>
     </div>
   </div>
   <button class="btn" onclick="mgBackToTitle()">&#8592; Back</button>
@@ -685,62 +827,62 @@ const DISHES = [
     name: 'Hyatt Signature Burger',
     emoji: '\u{1F354}',
     ingredients: [
-      { name: 'Brioche Bun',   emoji: '\u{1F950}', cat: 'base'    },
-      { name: 'Beef Patty',    emoji: '\u{1F969}', cat: 'protein' },
-      { name: 'Cheddar',       emoji: '\u{1F9C0}', cat: 'dairy'   },
-      { name: 'Lettuce',       emoji: '\u{1F96C}', cat: 'produce' },
-      { name: 'Tomato',        emoji: '\u{1F345}', cat: 'produce' },
-      { name: 'Pickles',       emoji: '\u{1F952}', cat: 'produce' },
-      { name: 'Special Sauce', emoji: '\u{1FAD9}', cat: 'sauce'   },
+      { name: 'Brioche Bun',   emoji: '\u{1F950}', cat: 'base',    desc: 'Lightly toasted; rich, buttery base — holds up to sauces without getting soggy.' },
+      { name: 'Beef Patty',    emoji: '\u{1F969}', cat: 'protein', desc: '6oz chuck blend, seasoned just before grilling; cooked to medium (63°C internal).' },
+      { name: 'Cheddar',       emoji: '\u{1F9C0}', cat: 'dairy',   desc: 'Aged cheddar melted directly on the grill. Allergen: dairy.' },
+      { name: 'Lettuce',       emoji: '\u{1F96C}', cat: 'produce', desc: 'Crisp romaine leaf; added cold for temperature contrast against the hot patty.' },
+      { name: 'Tomato',        emoji: '\u{1F345}', cat: 'produce', desc: 'Fresh beefsteak slice; adds acidity and freshness — slice to order.' },
+      { name: 'Pickles',       emoji: '\u{1F952}', cat: 'produce', desc: 'Bread & butter style; sweet-tangy balance that cuts through the richness.' },
+      { name: 'Special Sauce', emoji: '\u{1FAD9}', cat: 'sauce',   desc: 'House aioli blend. Allergen: egg. Always declare to guests.' },
     ],
   },
   {
     name: 'Caesar Salad',
     emoji: '\u{1F957}',
     ingredients: [
-      { name: 'Romaine',        emoji: '\u{1F96C}', cat: 'produce' },
-      { name: 'Croutons',       emoji: '\u{1F35E}', cat: 'base'    },
-      { name: 'Parmesan',       emoji: '\u{1F9C0}', cat: 'dairy'   },
-      { name: 'Caesar Dressing',emoji: '\u{1FAD9}', cat: 'sauce'   },
-      { name: 'Lemon Wedge',    emoji: '\u{1F34B}', cat: 'garnish' },
-      { name: 'Black Pepper',   emoji: '\u{1F33F}', cat: 'spice'   },
+      { name: 'Romaine',        emoji: '\u{1F96C}', cat: 'produce', desc: 'Chilled romaine hearts; hand-torn — never chopped — for texture.' },
+      { name: 'Croutons',       emoji: '\u{1F35E}', cat: 'base',    desc: 'House-baked with garlic butter; added at the last moment to stay crisp. Allergen: gluten.' },
+      { name: 'Parmesan',       emoji: '\u{1F9C0}', cat: 'dairy',   desc: 'Parmigiano-Reggiano, shaved tableside for freshness. Allergen: dairy.' },
+      { name: 'Caesar Dressing',emoji: '\u{1FAD9}', cat: 'sauce',   desc: 'Contains anchovies and egg — always declare to guests. Allergen: fish, egg.' },
+      { name: 'Lemon Wedge',    emoji: '\u{1F34B}', cat: 'garnish', desc: 'Squeezed to order just before service; brightens and balances the dressing.' },
+      { name: 'Black Pepper',   emoji: '\u{1F33F}', cat: 'spice',   desc: 'Freshly cracked only — pre-ground loses potency. Added just before service.' },
     ],
   },
   {
     name: 'Margherita Flatbread',
     emoji: '\u{1F355}',
     ingredients: [
-      { name: 'Flatbread Base',    emoji: '\u{1FAD3}', cat: 'base'    },
-      { name: 'Marinara',          emoji: '\u{1F345}', cat: 'sauce'   },
-      { name: 'Fresh Mozzarella',  emoji: '\u{1F9C0}', cat: 'dairy'   },
-      { name: 'Basil',             emoji: '\u{1F33F}', cat: 'garnish' },
-      { name: 'Olive Oil',         emoji: '\u{1FAD2}', cat: 'sauce'   },
-      { name: 'Sea Salt',          emoji: '\u{1F9C2}', cat: 'spice'   },
+      { name: 'Flatbread Base',    emoji: '\u{1FAD3}', cat: 'base',    desc: 'Par-baked in-house daily; store covered to prevent drying. Allergen: gluten.' },
+      { name: 'Marinara',          emoji: '\u{1F345}', cat: 'sauce',   desc: 'San Marzano tomatoes, fresh basil, no added sugar — spread thin and even.' },
+      { name: 'Fresh Mozzarella',  emoji: '\u{1F9C0}', cat: 'dairy',   desc: 'Buffalo mozzarella; pat dry before use — excess moisture makes the base soggy. Allergen: dairy.' },
+      { name: 'Basil',             emoji: '\u{1F33F}', cat: 'garnish', desc: 'Add after baking only — heat wilts and darkens the leaves instantly.' },
+      { name: 'Olive Oil',         emoji: '\u{1FAD2}', cat: 'sauce',   desc: 'Extra virgin; drizzled as a finishing touch for sheen and flavour, not for cooking.' },
+      { name: 'Sea Salt',          emoji: '\u{1F9C2}', cat: 'spice',   desc: 'Maldon flakes; finishing salt only — a light pinch over the basil before serving.' },
     ],
   },
   {
     name: 'Berry Smoothie Bowl',
     emoji: '\u{1F964}',
     ingredients: [
-      { name: 'Acai Base',     emoji: '\u{1F347}', cat: 'base'    },
-      { name: 'Banana',        emoji: '\u{1F34C}', cat: 'produce' },
-      { name: 'Blueberries',   emoji: '\u{1FAD0}', cat: 'produce' },
-      { name: 'Granola',       emoji: '\u{1F33E}', cat: 'base'    },
-      { name: 'Honey Drizzle', emoji: '\u{1F36F}', cat: 'sauce'   },
-      { name: 'Chia Seeds',    emoji: '\u{1F331}', cat: 'garnish' },
+      { name: 'Acai Base',     emoji: '\u{1F347}', cat: 'base',    desc: 'Frozen acai blend; vegan and antioxidant-rich — blend until completely smooth.' },
+      { name: 'Banana',        emoji: '\u{1F34C}', cat: 'produce', desc: 'Frozen for thick, creamy texture; acts as a natural sweetener — no sugar needed.' },
+      { name: 'Blueberries',   emoji: '\u{1FAD0}', cat: 'produce', desc: 'Fresh or frozen; rich in antioxidants — arranged neatly as a topping.' },
+      { name: 'Granola',       emoji: '\u{1F33E}', cat: 'base',    desc: 'House-made; added just before serving to keep its crunch. Allergen: tree nuts, gluten.' },
+      { name: 'Honey Drizzle', emoji: '\u{1F36F}', cat: 'sauce',   desc: 'Local raw honey; not vegan — always inform guests who request a vegan option.' },
+      { name: 'Chia Seeds',    emoji: '\u{1F331}', cat: 'garnish', desc: 'Omega-3 rich; sprinkle as the final topping for texture and nutritional value.' },
     ],
   },
   {
     name: 'Classic Mojito',
     emoji: '\u{1F379}',
     ingredients: [
-      { name: 'White Rum',   emoji: '\u{1F943}', cat: 'spirit'  },
-      { name: 'Lime Juice',  emoji: '\u{1F34B}', cat: 'citrus'  },
-      { name: 'Sugar',       emoji: '\u{1F36C}', cat: 'spice'   },
-      { name: 'Mint Leaves', emoji: '\u{1F331}', cat: 'garnish' },
-      { name: 'Soda Water',  emoji: '\u{1F4A7}', cat: 'liquid'  },
-      { name: 'Ice',         emoji: '\u{1F9CA}', cat: 'base'    },
-      { name: 'Lime Wheel',  emoji: '\u{1F7E2}', cat: 'garnish' },
+      { name: 'White Rum',   emoji: '\u{1F943}', cat: 'spirit',  desc: '2oz standard pour; Bacardi Superior preferred — measure precisely for consistency.' },
+      { name: 'Lime Juice',  emoji: '\u{1F34B}', cat: 'citrus',  desc: 'Fresh-squeezed to order only — bottled juice is never acceptable.' },
+      { name: 'Sugar',       emoji: '\u{1F36C}', cat: 'spice',   desc: 'Muddle raw sugar directly with mint, or use house simple syrup for speed.' },
+      { name: 'Mint Leaves', emoji: '\u{1F331}', cat: 'garnish', desc: 'Muddle gently to bruise — not shred. Shredding releases bitter chlorophyll.' },
+      { name: 'Soda Water',  emoji: '\u{1F4A7}', cat: 'liquid',  desc: 'Top last and pour slowly down the side of the glass to preserve carbonation.' },
+      { name: 'Ice',         emoji: '\u{1F9CA}', cat: 'base',    desc: 'Crushed ice preferred; fills the glass fully and chills the drink faster.' },
+      { name: 'Lime Wheel',  emoji: '\u{1F7E2}', cat: 'garnish', desc: 'Garnish on the rim; cut fresh daily — never pre-cut and stored overnight.' },
     ],
   },
 ];
@@ -759,23 +901,38 @@ const CAT_COLORS = {
 };
 
 // ─────────────────────────────────────────────
+// DIFFICULTY CONFIG
+// ─────────────────────────────────────────────
+const DIFFICULTIES = {
+  easy:   { label: 'Easy',   mgShortSecs: 20, mgLongSecs: 75, mgMysterySecs: 120, mfFlashSecs: 4, mfRecallSecs: 40 },
+  medium: { label: 'Medium', mgShortSecs: 15, mgLongSecs: 60, mgMysterySecs:  90, mfFlashSecs: 3, mfRecallSecs: 30 },
+  hard:   { label: 'Hard',   mgShortSecs: 10, mgLongSecs: 45, mgMysterySecs:  60, mfFlashSecs: 2, mfRecallSecs: 20 },
+};
+let selectedDiff = 'medium';
+
+function setDiff(key) {
+  selectedDiff = key;
+  document.querySelectorAll('.diff-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.diff === key)
+  );
+  const d = DIFFICULTIES[key];
+  const hint = key === 'easy'   ? 'Relaxed Timers &bull; Great For Beginners'
+             : key === 'hard'   ? 'Tight Timers &bull; Push Your Limits'
+             :                    'Standard Timers &bull; Balanced Challenge';
+  document.getElementById('how-to-play').innerHTML =
+    `6 Mini-Games &bull; Test Your F&amp;B Recipe Knowledge<br>` +
+    `Odd One Out &bull; Ingredient Match &bull; Speed Sort<br>` +
+    `Mystery Dish &bull; What's Missing? &bull; Memory Flash<br>` +
+    `<span style="color:rgba(201,168,76,0.35);font-size:10px;letter-spacing:1.5px;">${hint}</span>`;
+}
+
+// ─────────────────────────────────────────────
 // GAME STATE
 // ─────────────────────────────────────────────
 const GS = {
-  phase: 'title',
-  dishIdx: 0,
-  nextIdx: 0,
-  score: 0,
-  streak: 0,
-  prevMult: 1,          // track last streak multiplier to detect increases
-  timeLeft: 60,
-  timerHandle: null,
-  autoAdvanceHandle: null,
-  cards: [],            // THREE.Group[] — active ingredient cards
-  trayCards: [],        // cards that flew to tray
-  correct: 0,
-  wrong: 0,
-  dishResults: [],      // per-dish result objects
+  phase:     'title',
+  cards:     [],   // THREE.Group[] — active ingredient cards
+  trayCards: [],   // cards that flew to tray
 };
 
 // ── Mini-Game state ──
@@ -811,6 +968,13 @@ const MG = {
   mysteryCards:   [],
   mysteryClueIdx: 0,
   mysteryWrong:   0,
+  // Memory Flash
+  mfDish:         null,
+  mfNextIdx:      0,
+  mfRound:        0,
+  mfTotalRounds:  3,
+  mfCorrect:      0,
+  mfFlashing:     false,
 };
 
 // ─────────────────────────────────────────────
@@ -1251,53 +1415,6 @@ function matchCardPositions(n) {
   }));
 }
 
-// ─────────────────────────────────────────────
-// DEAL CARDS
-// ─────────────────────────────────────────────
-function dealCards(dish) {
-  purgeCards();
-
-  // Shuffle
-  const shuffled = [...dish.ingredients].sort(() => Math.random() - 0.5);
-  const positions = cardPositions(shuffled.length);
-
-  shuffled.forEach((ing, i) => {
-    const card = createCard(ing);
-
-    // Start below screen, face-down (back toward camera)
-    card.position.set(positions[i].x, -9, positions[i].z);
-    card.rotation.y = Math.PI;
-    card.rotation.z = 0;
-
-    scene.add(card);
-    GS.cards.push(card);
-
-    // Deal-in stagger
-    gsap.to(card.position, {
-      y: positions[i].y,
-      duration: 0.55,
-      delay: i * 0.09,
-      ease: 'back.out(1.3)',
-    });
-  });
-}
-
-function floatCard(card, base) {
-  if (card.userData.selected) return;
-  card.userData.baseY = base.y;
-
-  const dur = 2.0 + Math.random() * 1.5;
-  const amp = 0.05 + Math.random() * 0.06;
-
-  // Gentle vertical oscillation only — no tilt, keeps the row clean
-  card.userData.ft = gsap.to(card.position, {
-    y: base.y + amp,
-    duration: dur,
-    yoyo: true, repeat: -1,
-    ease: 'sine.inOut',
-    delay: Math.random() * dur,
-  });
-}
 
 function purgeCards() {
   [...GS.cards, ...GS.trayCards].forEach(card => {
@@ -1336,15 +1453,6 @@ function flipAndFly(card, slotIdx, totalSlots) {
   gsap.to(card.position,  { x: tx, y: ty, z: tz, duration: 0.55, delay: 0.08, ease: 'power3.inOut' });
 
   GS.trayCards.push(card);
-}
-
-function addCompletedBadge(ing) {
-  const strip = document.getElementById('completed-strip');
-  const badge = document.createElement('div');
-  badge.className = 'completed-badge';
-  badge.innerHTML = `<span class="b-emoji">${ing.emoji}</span><span>${ing.name}</span>`;
-  strip.appendChild(badge);
-  requestAnimationFrame(() => requestAnimationFrame(() => badge.classList.add('show')));
 }
 
 function shakeCard(card) {
@@ -1462,17 +1570,43 @@ function confettiBurst(pos, color) {
 }
 
 // ─────────────────────────────────────────────
+// INGREDIENT TOOLTIP
+// ─────────────────────────────────────────────
+function showIngredientTooltip(ing) {
+  if (!ing || !ing.desc) return;
+  const el = document.getElementById('ingredient-tooltip');
+  el.querySelector('.tt-name').textContent = ing.emoji + '  ' + ing.name;
+  el.querySelector('.tt-desc').textContent = ing.desc;
+  el.style.opacity = '1';
+}
+
+function hideIngredientTooltip() {
+  document.getElementById('ingredient-tooltip').style.opacity = '0';
+}
+
+// ─────────────────────────────────────────────
 // HOVER & CLICK
 // ─────────────────────────────────────────────
 function updateHover() {
   if (GS.phase === 'mg-oo')    { mgOoHover();    return; }
   if (GS.phase === 'mg-match') { mgMatchHover(); return; }
+  if (GS.phase === 'mg-mf')    { mgMfHover();    return; }
+  if (GS.phase === 'preview') {
+    // Show tooltip on face-up cards during memorization phase
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(GS.cards, true);
+    let hit = null;
+    if (hits.length) { let o = hits[0].object; while (o && !o.userData.ing) o = o.parent; if (o) hit = o; }
+    if (hit) showIngredientTooltip(hit.userData.ing); else hideIngredientTooltip();
+    return;
+  }
   if (GS.phase !== 'playing') {
     if (hoveredCard) {
       gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
       hoveredCard.userData.frontMat.emissiveIntensity = 0;
       hoveredCard = null;
     }
+    hideIngredientTooltip();
     document.body.style.cursor = 'default';
     return;
   }
@@ -1508,419 +1642,23 @@ function updateHover() {
 function handleClick() {
   if (GS.phase === 'mg-oo')    { mgOoHandleClick();    return; }
   if (GS.phase === 'mg-match') { mgMatchHandleClick(); return; }
-  if (GS.phase === 'mg-sort' || GS.phase === 'mg-mystery' || GS.phase === 'mg-wm') return;
-  if (GS.phase !== 'playing') return;
-  raycaster.setFromCamera(mouse, camera);
-
-  const targets = GS.cards.filter(c => !c.userData.selected && !c.userData.flipping);
-  const hits = raycaster.intersectObjects(targets, true);
-  if (!hits.length) return;
-
-  let card = hits[0].object;
-  while (card && !card.userData.ing) card = card.parent;
-  if (!card || card.userData.selected || card.userData.flipping) return;
-
-  pickIngredient(card);
+  if (GS.phase === 'mg-mf')    { mgMfHandleClick();    return; }
 }
 
 // ─────────────────────────────────────────────
-// GAME LOGIC
+// NAVIGATION
 // ─────────────────────────────────────────────
-function startGame() {
-  document.getElementById('title-screen').style.display = 'none';
-  document.getElementById('hud').style.display = 'flex';
-
-  GS.score       = 0;
-  GS.streak      = 0;
-  GS.prevMult    = 1;
-  GS.dishIdx     = 0;
-  GS.phase       = 'playing';
-  GS.dishResults = [];
-  startAmbient();
-
-  refreshHUD();
-  startRound();
-}
-
-function startPreview(dish) {
-  const PREVIEW_SECS = 4;
-  const n = GS.cards.length;
-  // Wait for the deal-in stagger to finish before revealing
-  const dealDelay = (n - 1) * 0.09 + 0.55 + 0.2;
-
-  setTimeout(() => {
-    // Flip all cards face-up so player can memorize
-    GS.cards.forEach((card, i) => {
-      gsap.to(card.rotation, { y: 0, duration: 0.4, delay: i * 0.07, ease: 'power2.inOut' });
-    });
-
-    // Show countdown bar
-    const bar      = document.getElementById('preview-bar');
-    const fill     = document.getElementById('preview-fill');
-    const countEl  = document.getElementById('preview-countdown');
-    bar.classList.add('show');
-    gsap.fromTo(fill, { scaleX: 1 }, { scaleX: 0, duration: PREVIEW_SECS, ease: 'linear' });
-
-    let secs = PREVIEW_SECS;
-    countEl.textContent = secs;
-    const countHandle = setInterval(() => {
-      secs--;
-      if (secs > 0) countEl.textContent = secs;
-    }, 1000);
-
-    // After preview, flip all cards back face-down
-    setTimeout(() => {
-      clearInterval(countHandle);
-      bar.classList.remove('show');
-
-      GS.cards.forEach((card, i) => {
-        gsap.to(card.rotation, { y: Math.PI, duration: 0.35, delay: i * 0.05, ease: 'power2.inOut' });
-      });
-
-      // Once cards are face-down, start the actual round
-      const flipBackMs = (n - 1) * 50 + 400;
-      setTimeout(() => {
-        if (GS.phase !== 'preview') return; // guard against restart/abort
-        GS.phase = 'playing';
-        clearInterval(GS.timerHandle);
-        GS.timerHandle = setInterval(tickTimer, 1000);
-        renderTimer();
-      }, flipBackMs);
-
-    }, PREVIEW_SECS * 1000);
-  }, dealDelay * 1000);
-}
-
-function startRound() {
-  const dish = DISHES[GS.dishIdx];
-
-  document.getElementById('preview-bar').classList.remove('show'); // clear any lingering preview
-
-  GS.nextIdx  = 0;
-  GS.timeLeft = 60;
-  GS.correct  = 0;
-  GS.wrong    = 0;
-  GS.phase    = 'preview'; // preview first; startPreview() switches to 'playing'
-
-  document.getElementById('completed-strip').innerHTML = '';
-  document.getElementById('dish-display').style.display = 'block';
-
-  const dn = document.getElementById('dish-name');
-  dn.style.opacity = '0';
-  dn.textContent = dish.name;
-  gsap.to(dn, { opacity: 1, duration: 0.5, delay: 0.2 });
-
-  document.getElementById('round-value').textContent = `Dish ${GS.dishIdx + 1} / ${DISHES.length}`;
-  document.getElementById('progress-fill').style.width = '0%';
-  document.getElementById('progress-label').textContent = `0 of ${dish.ingredients.length}`;
-
-  clearInterval(GS.timerHandle); // stop any previous timer
-  dealCards(dish);
-  startPreview(dish); // flips cards face-up, counts down, then starts timer
-}
-
-function pickIngredient(card) {
-  // Lock card during flip so double-clicks are ignored
-  card.userData.flipping = true;
-
-  // Phase 1: flip from back (π) → front (0), revealing the ingredient
-  gsap.to(card.rotation, {
-    y: 0,
-    duration: 0.38,
-    ease: 'power2.inOut',
-    onComplete: () => evaluateCard(card),
-  });
-}
-
-function evaluateCard(card) {
-  const dish     = DISHES[GS.dishIdx];
-  const expected = dish.ingredients[GS.nextIdx];
-
-  if (card.userData.ing.name === expected.name) {
-    // ── Correct ──
-    GS.correct++;
-    GS.streak++;
-
-    const mult   = GS.streak >= 6 ? 3 : GS.streak >= 3 ? 2 : 1;
-    const points = 100 * mult;
-    GS.score += points;
-
-    sfxCorrect();
-    // Green glow on correct — keep intensity low so texture stays visible
-    card.userData.frontMat.emissive.set(0x00ee55);
-    card.userData.frontMat.emissiveIntensity = 0.2;
-
-    burst(card.position.clone());
-    flipAndFly(card, GS.nextIdx, dish.ingredients.length);
-
-    GS.nextIdx++;
-
-    const pct = GS.nextIdx / dish.ingredients.length * 100;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-label').textContent =
-      `${GS.nextIdx} of ${dish.ingredients.length}`;
-
-    const label = mult > 1
-      ? `+${points}  \u{1F525} x${mult} streak!`
-      : `+${points}  Correct!`;
-    showFeedback(label, '#C9A84C');
-
-    if (GS.nextIdx >= dish.ingredients.length) {
-      setTimeout(celebrateComplete, 700);
-    }
-  } else {
-    // ── Wrong: show front briefly, then flip back face-down ──
-    sfxWrong();
-    GS.wrong++;
-    GS.streak = 0;
-    shakeCard(card);
-    showFeedback('Wrong order \u2014 try again', '#ff4b4b');
-
-    setTimeout(() => {
-      gsap.to(card.rotation, {
-        y: Math.PI,
-        duration: 0.38,
-        ease: 'power2.inOut',
-        onComplete: () => { card.userData.flipping = false; },
-      });
-    }, 650);
-  }
-
-  refreshHUD();
-}
-
-// ─────────────────────────────────────────────
-// COMPLETE CELEBRATION
-// ─────────────────────────────────────────────
-function celebrateComplete() {
-  GS.phase = 'celebrating';
-  clearInterval(GS.timerHandle);
-  sfxComplete();
-
-  // Staggered green flash on every tray card
-  GS.trayCards.forEach((card, i) => {
-    setTimeout(() => {
-      card.userData.frontMat.emissive.set(0x00ff66);
-      card.userData.frontMat.emissiveIntensity = 0.35;
-      burst(card.position.clone());
-      gsap.to(card.userData.frontMat, {
-        emissiveIntensity: 0.1, duration: 0.7, delay: 0.15, ease: 'power2.out',
-      });
-    }, i * 90);
-  });
-
-  // Multi-color confetti cascade after the tray flash
-  const lastDelay = GS.trayCards.length * 90 + 60;
-  const confettiColors = [0xC9A84C, 0xffffff, 0x006E96, 0x00cc66, 0xffa040];
-  confettiColors.forEach((col, i) => {
-    setTimeout(() => confettiBurst(new THREE.Vector3((i - 2) * 1.6, 0.5, 0), col), lastDelay + i * 70);
-  });
-  setTimeout(() => confettiBurst(new THREE.Vector3(0, 1.0, 0), 0xC9A84C), lastDelay + 420);
-
-  // "Complete!" overlay text
-  showCompleteOverlay(DISHES[GS.dishIdx].name);
-
-  // Auto-advance to round-end stats after celebration finishes
-  setTimeout(endRound, 2600);
-}
-
-function showCompleteOverlay(dishName) {
-  // Reuse the feedback element for the big COMPLETE message
-  const el = document.getElementById('feedback');
-  gsap.killTweensOf(el);
-
-  el.innerHTML = `<div style="font-size:13px;letter-spacing:4px;text-transform:uppercase;
-    color:rgba(0,255,102,0.7);margin-bottom:8px;">${dishName}</div>
-    <div style="font-size:52px;color:#00ff88;
-    text-shadow:0 0 40px rgba(0,255,102,0.8);">&#10003; Complete!</div>`;
-  el.style.color = '#00ff88';
-  el.style.bottom = '50%';
-  el.style.transform = 'translateX(-50%) translateY(50%)';
-
-  gsap.fromTo(el,
-    { opacity: 0 },
-    {
-      opacity: 1, duration: 0.35, ease: 'power2.out',
-      onComplete: () => {
-        gsap.to(el, {
-          opacity: 0, duration: 0.4, delay: 1.6, ease: 'power2.in',
-          onComplete: () => {
-            el.innerHTML = '';
-            el.style.bottom  = '90px';
-            el.style.transform = 'translateX(-50%)';
-          },
-        });
-      },
-    }
-  );
-}
-
-function endRound() {
-  clearInterval(GS.timerHandle);
-  GS.phase = 'roundEnd';
-
-  const tb = GS.timeLeft * 50;
-  GS.score += tb;
-
-  const dish = DISHES[GS.dishIdx];
-  const acc  = GS.correct + GS.wrong > 0
-    ? Math.round(GS.correct / (GS.correct + GS.wrong) * 100)
-    : 100;
-
-  const completed = GS.nextIdx >= dish.ingredients.length;
-  const isLast    = GS.dishIdx >= DISHES.length - 1;
-
-  // Record this dish's result
-  GS.dishResults.push({
-    name:      dish.name,
-    emoji:     dish.emoji,
-    completed,
-    accuracy:  acc,
-    timeLeft:  GS.timeLeft,
-  });
-
-  document.getElementById('re-emoji').textContent = dish.emoji;
-  document.getElementById('re-title').textContent = dish.name + ' \u2014 ' + (completed ? 'Complete!' : 'Time\'s up!');
-  document.getElementById('re-stats').innerHTML =
-    `Accuracy: <strong style="color:${acc >= 80 ? '#00ff88' : '#C9A84C'}">${acc}%</strong><br>` +
-    `Time Bonus: <strong>+${tb}</strong><br>` +
-    `Total Score: <strong>${GS.score.toLocaleString()}</strong>`;
-
-  document.getElementById('next-dish-btn').textContent =
-    isLast ? 'See Final Score \u2192' : 'Next Dish \u2192';
-
-  document.getElementById('round-end').classList.add('show');
-  refreshHUD();
-
-  // Auto-advance countdown (4 s)
-  let countdown = 4;
-  const label = document.getElementById('auto-advance-label');
-  label.textContent = `Continuing in ${countdown}s\u2026`;
-  const iv = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) {
-      clearInterval(iv);
-      label.textContent = '';
-      nextRound();
-    } else {
-      label.textContent = `Continuing in ${countdown}s\u2026`;
-    }
-  }, 1000);
-
-  // Store so nextRound() can cancel it if clicked early
-  GS.autoAdvanceHandle = iv;
-}
-
-function nextRound() {
-  clearInterval(GS.autoAdvanceHandle);
-  document.getElementById('auto-advance-label').textContent = '';
-  document.getElementById('round-end').classList.remove('show');
-  GS.dishIdx++;
-
-  if (GS.dishIdx >= DISHES.length) {
-    endGame();
-  } else {
-    startRound();
-  }
-}
-
-function endGame() {
-  clearInterval(GS.timerHandle);
-  clearInterval(GS.autoAdvanceHandle);
+function backToMenu() {
   purgeCards();
-  stopAmbient();
-  GS.phase = 'gameOver';
-
-  document.getElementById('dish-display').style.display = 'none';
-  document.getElementById('hud').style.display = 'none';
-
-  // Tally results
-  const mastered   = GS.dishResults.filter(r => r.completed).length;
-  const overallAcc = GS.dishResults.length
-    ? Math.round(GS.dishResults.reduce((s, r) => s + r.accuracy, 0) / GS.dishResults.length)
-    : 0;
-
-  const rank = mastered === 5 && overallAcc === 100 ? 'Executive Chef \u2605'
-             : mastered >= 4  ? 'Sous Chef'
-             : mastered >= 3  ? 'Line Cook'
-             : mastered >= 1  ? 'Prep Cook'
-             : 'Apprentice';
-
-  document.getElementById('go-recipes-num').textContent = mastered;
-  document.getElementById('go-score').textContent = GS.score.toLocaleString();
-  document.getElementById('go-rank').innerHTML =
-    `<span>${rank}</span> &nbsp;&bull;&nbsp; ${overallAcc}% avg accuracy`;
-
-  // Per-dish results table
-  const rows = GS.dishResults.map(r => {
-    const cls   = r.completed ? 'completed' : 'incomplete';
-    const check = r.completed ? '&#10003;' : '&#10007;';
-    const acc   = r.accuracy + '%';
-    return `<div class="result-row ${cls}">
-      <span class="result-icon">${r.emoji}</span>
-      <span class="result-name">${r.name}</span>
-      <span class="result-acc">${acc}</span>
-      <span class="result-check">${check}</span>
-    </div>`;
-  }).join('');
-
-  document.getElementById('go-results-table').innerHTML = rows;
-  document.getElementById('game-over').classList.add('show');
-}
-
-function restartGame() {
-  document.getElementById('game-over').classList.remove('show');
-  document.getElementById('hud').style.display = 'flex';
   hoveredCard = null;
-  startGame();
-}
-
-// ─────────────────────────────────────────────
-// TIMER & HUD
-// ─────────────────────────────────────────────
-function tickTimer() {
-  if (GS.phase !== 'playing') return;
-  GS.timeLeft = Math.max(0, GS.timeLeft - 1);
-  renderTimer();
-  if (GS.timeLeft === 0) {
-    clearInterval(GS.timerHandle);
-    showFeedback("Time's up!", '#ff4b4b');
-    setTimeout(endRound, 900);
-  }
-}
-
-function renderTimer() {
-  const el = document.getElementById('timer-value');
-  const m  = Math.floor(GS.timeLeft / 60);
-  const s  = GS.timeLeft % 60;
-  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
-  const urgent = GS.timeLeft <= 10 && GS.timeLeft > 0;
-  el.classList.toggle('urgent', urgent);
-  if (urgent) sfxTick();
-}
-
-function refreshHUD() {
-  // Score with pop animation
-  const scoreEl = document.getElementById('score-value');
-  scoreEl.textContent = GS.score.toLocaleString();
-  scoreEl.classList.remove('score-pop');
-  void scoreEl.offsetWidth; // reflow to restart animation
-  scoreEl.classList.add('score-pop');
-
-  // Streak multiplier with flash when it increases
-  const mult     = GS.streak >= 6 ? 3 : GS.streak >= 3 ? 2 : 1;
-  const multEl   = document.getElementById('streak-mult');
-  multEl.textContent = `x${mult}`;
-
-  if (mult > GS.prevMult) {
-    multEl.classList.remove('streak-flash');
-    void multEl.offsetWidth;
-    multEl.classList.add('streak-flash');
-    multEl.style.color = mult >= 3 ? '#ff9900' : '#C9A84C';
-  } else if (GS.streak === 0) {
-    multEl.style.color = '#C9A84C';
-  }
-  GS.prevMult = mult;
+  GS.phase = 'title';
+  hideIngredientTooltip();
+  document.getElementById('hud').style.display          = 'none';
+  document.getElementById('dish-display').style.display = 'none';
+  document.getElementById('completed-strip').innerHTML  = '';
+  document.getElementById('feedback').style.opacity     = '0';
+  document.getElementById('preview-bar').classList.remove('show');
+  document.getElementById('title-screen').style.display = 'flex';
 }
 
 function showFeedback(text, color = '#C9A84C') {
@@ -1959,13 +1697,14 @@ function mgLaunch(game) {
   mgCommonTeardown();
   document.getElementById('hud').style.display = 'flex';
   document.getElementById('score-value').textContent = '0';
-  document.getElementById('round-value').textContent = 'Mini-Game';
+  document.getElementById('round-value').textContent = `Mini-Game · ${DIFFICULTIES[selectedDiff].label}`;
   document.getElementById('streak-mult').textContent = '';
   if      (game === 'oo')      { MG.ooRound = 0; MG.ooCorrect = 0; mgOoNextRound(); }
   else if (game === 'match')   mgMatchStart();
   else if (game === 'sort')    mgSortStart();
   else if (game === 'mystery') mgMysteryStart();
   else if (game === 'wm')      { MG.wmRound = 0; MG.wmCorrect = 0; mgWmNextRound(); }
+  else if (game === 'mf')      { MG.mfRound = 0; MG.mfCorrect = 0; mgMfNextRound(); }
 }
 
 function mgPlayAgain() { mgLaunch(MG.game); }
@@ -1989,6 +1728,7 @@ function mgCommonTeardown() {
   document.getElementById('mystery-options').classList.remove('show');
   document.getElementById('wm-options').classList.remove('show');
   document.getElementById('wm-options').innerHTML = '';
+  document.getElementById('preview-bar').classList.remove('show');
   document.getElementById('dish-display').style.display = 'none';
   document.getElementById('completed-strip').innerHTML = '';
   if (hoveredCard) {
@@ -2118,7 +1858,7 @@ function mgOoNextRound() {
     gsap.to(card.position, { y: pos[i].y, duration: 0.55, delay: i * 0.09, ease: 'back.out(1.3)' });
   });
 
-  mgStartTimer(15, () => {
+  mgStartTimer(DIFFICULTIES[selectedDiff].mgShortSecs, () => {
     if (GS.phase !== 'mg-oo') return;
     sfxWrong();
     showFeedback("Time's up!", '#ff4b4b');
@@ -2147,8 +1887,10 @@ function mgOoHover() {
       hoveredCard.userData.frontMat.emissive.set(0xC9A84C);
       hoveredCard.userData.frontMat.emissiveIntensity = 0.2;
       document.body.style.cursor = 'pointer';
+      showIngredientTooltip(hoveredCard.userData.ing);
     } else {
       document.body.style.cursor = 'default';
+      hideIngredientTooltip();
     }
   }
 }
@@ -2245,7 +1987,7 @@ function mgMatchStart() {
 
   setTimeout(() => {
     GS.phase = 'mg-match';
-    mgStartTimer(60, () => { showFeedback("Time's up!", '#ff4b4b'); setTimeout(mgMatchEnd, 900); });
+    mgStartTimer(DIFFICULTIES[selectedDiff].mgLongSecs, () => { showFeedback("Time's up!", '#ff4b4b'); setTimeout(mgMatchEnd, 900); });
   }, 12 * 50 + 900);
 }
 
@@ -2356,7 +2098,7 @@ function mgSortStart() {
   MG._sortPoolIdx = 0;
 
   mgSortSchedule();
-  mgStartTimer(45, () => {
+  mgStartTimer(DIFFICULTIES[selectedDiff].mgLongSecs, () => {
     GS.phase = 'mg-idle';
     clearTimeout(MG.sortSpawnHandle);
     MG.sortItems.forEach(it => { it.tween && it.tween.kill(); it.el.remove(); });
@@ -2507,7 +2249,7 @@ function mgWmNextRound() {
   });
   container.classList.add('show');
 
-  mgStartTimer(15, () => {
+  mgStartTimer(DIFFICULTIES[selectedDiff].mgShortSecs, () => {
     if (GS.phase !== 'mg-wm') return;
     sfxWrong();
     showFeedback("Time's up!", '#ff4b4b');
@@ -2600,7 +2342,7 @@ function mgMysteryStart() {
   });
   optDiv.classList.add('show');
 
-  mgStartTimer(90, () => mgMysteryEnd(false));
+  mgStartTimer(DIFFICULTIES[selectedDiff].mgMysterySecs, () => mgMysteryEnd(false));
   setTimeout(mgMysteryReveal, 400);
 }
 
@@ -2686,6 +2428,191 @@ function mgMysteryEnd(won) {
   );
 }
 
+// ════════════════════════════════════════════
+// 6. MEMORY FLASH
+// ════════════════════════════════════════════
+function mgMfNextRound() {
+  if (MG.mfRound >= MG.mfTotalRounds) { mgMfEnd(); return; }
+  MG.mfRound++;
+  MG.mfFlashing = true;
+  MG.mfNextIdx  = 0;
+
+  // Pick a random dish (avoid repeating the previous one when possible)
+  const pool = DISHES.filter(d => !MG.mfDish || d !== MG.mfDish);
+  MG.mfDish = pool[Math.floor(Math.random() * pool.length)];
+  const dish = MG.mfDish;
+
+  GS.phase = 'mg-mf';
+
+  document.getElementById('dish-display').style.display  = 'block';
+  document.getElementById('dish-name').textContent        = '🧠 Memory Flash';
+  document.getElementById('dish-instruction').textContent = `Memorize: ${dish.emoji} ${dish.name}`;
+  document.getElementById('progress-fill').style.width    = '0%';
+  document.getElementById('progress-label').textContent   = `Round ${MG.mfRound} of ${MG.mfTotalRounds}`;
+  document.getElementById('completed-strip').innerHTML    = '';
+
+  // Deal cards face-up in a SHUFFLED order so positions don't give away the sequence
+  purgeCards();
+  const shuffled = [...dish.ingredients].sort(() => Math.random() - 0.5);
+  const pos = cardPositions(shuffled.length);
+  shuffled.forEach((ing, i) => {
+    const card = createCard(ing);
+    card.position.set(pos[i].x, -9, pos[i].z);
+    card.rotation.y = 0; // face-up so player can memorize
+    scene.add(card);
+    GS.cards.push(card);
+    gsap.to(card.position, { y: pos[i].y, duration: 0.55, delay: i * 0.09, ease: 'back.out(1.3)' });
+  });
+
+  // Show the flash countdown bar
+  const diff     = DIFFICULTIES[selectedDiff];
+  const flashSecs  = diff.mfFlashSecs;
+  const recallSecs = diff.mfRecallSecs;
+  const bar      = document.getElementById('preview-bar');
+  const fill     = document.getElementById('preview-fill');
+  const countEl  = document.getElementById('preview-countdown');
+  document.getElementById('preview-heading').textContent = 'Memorize the Order!';
+  bar.classList.add('show');
+  gsap.fromTo(fill, { scaleX: 1 }, { scaleX: 0, duration: flashSecs, ease: 'linear' });
+
+  let secs = flashSecs;
+  countEl.textContent = secs;
+  const countHandle = setInterval(() => {
+    secs--;
+    if (secs > 0) countEl.textContent = secs;
+  }, 1000);
+
+  // After flash: flip all face-down, then let player pick
+  setTimeout(() => {
+    clearInterval(countHandle);
+    bar.classList.remove('show');
+
+    GS.cards.forEach((card, i) => {
+      gsap.to(card.rotation, { y: Math.PI, duration: 0.35, delay: i * 0.05, ease: 'power2.inOut' });
+    });
+
+    const flipMs = (GS.cards.length - 1) * 50 + 400;
+    setTimeout(() => {
+      if (GS.phase !== 'mg-mf') return;
+      MG.mfFlashing = false;
+      document.getElementById('dish-instruction').textContent = 'Now pick the ingredients in order!';
+      mgStartTimer(recallSecs, () => {
+        if (GS.phase !== 'mg-mf') return;
+        showFeedback("Time's up!", '#ff4b4b');
+        sfxWrong();
+        setTimeout(mgMfNextRound, 900);
+      });
+    }, flipMs);
+  }, flashSecs * 1000);
+}
+
+function mgMfHover() {
+  if (MG.mfFlashing) {
+    hideIngredientTooltip();
+    return;
+  }
+  raycaster.setFromCamera(mouse, camera);
+  const targets = GS.cards.filter(c => !c.userData.selected && !c.userData.flipping);
+  const hits = raycaster.intersectObjects(targets, true);
+  let hit = null;
+  if (hits.length) {
+    let obj = hits[0].object;
+    while (obj && !obj.userData.ing) obj = obj.parent;
+    if (obj && obj.userData.ing) hit = obj;
+  }
+  if (hit !== hoveredCard) {
+    if (hoveredCard && !hoveredCard.userData.selected) {
+      gsap.to(hoveredCard.scale, { x: 1, y: 1, z: 1, duration: 0.18 });
+      if (hoveredCard.userData.backMat) hoveredCard.userData.backMat.emissiveIntensity = 0;
+    }
+    hoveredCard = hit;
+    if (hoveredCard) {
+      gsap.to(hoveredCard.scale, { x: 1.06, y: 1.06, z: 1.06, duration: 0.18 });
+      hoveredCard.userData.backMat.emissive.set(0xC9A84C);
+      hoveredCard.userData.backMat.emissiveIntensity = 0.22;
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'default';
+      hideIngredientTooltip();
+    }
+  }
+}
+
+function mgMfHandleClick() {
+  if (MG.mfFlashing) return;
+  raycaster.setFromCamera(mouse, camera);
+  const targets = GS.cards.filter(c => !c.userData.selected && !c.userData.flipping);
+  const hits = raycaster.intersectObjects(targets, true);
+  if (!hits.length) return;
+  let card = hits[0].object;
+  while (card && !card.userData.ing) card = card.parent;
+  if (!card || card.userData.selected || card.userData.flipping) return;
+
+  // Flip to reveal, then evaluate
+  card.userData.flipping = true;
+  gsap.to(card.rotation, {
+    y: 0, duration: 0.38, ease: 'power2.inOut',
+    onComplete: () => mgMfEvaluate(card),
+  });
+}
+
+function mgMfEvaluate(card) {
+  const dish     = MG.mfDish;
+  const expected = dish.ingredients[MG.mfNextIdx];
+
+  if (card.userData.ing.name === expected.name) {
+    // ── Correct ──
+    const pts = 100;
+    MG.score += pts;
+    MG.mfCorrect++;
+    sfxCorrect();
+    card.userData.frontMat.emissive.set(0x00ee55);
+    card.userData.frontMat.emissiveIntensity = 0.2;
+    burst(card.position.clone());
+    flipAndFly(card, MG.mfNextIdx, dish.ingredients.length);
+    MG.mfNextIdx++;
+
+    const pct = MG.mfNextIdx / dish.ingredients.length * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    showFeedback(`+${pts}  Correct!`, '#C9A84C');
+    mgRefreshScore();
+
+    if (MG.mfNextIdx >= dish.ingredients.length) {
+      // All ingredients recalled correctly — time bonus
+      clearInterval(MG.timerHandle);
+      const bonus = MG.timeLeft * 20;
+      MG.score += bonus;
+      sfxComplete();
+      confettiBurst(new THREE.Vector3(0, 0.5, 0), 0xC9A84C);
+      showFeedback(bonus ? `Round complete! +${bonus} time bonus` : 'Round complete!', '#00ff88');
+      mgRefreshScore();
+      setTimeout(mgMfNextRound, 1800);
+    }
+  } else {
+    // ── Wrong — flip back face-down ──
+    sfxWrong();
+    shakeCard(card);
+    showFeedback('Wrong order — try again!', '#ff4b4b');
+    setTimeout(() => {
+      gsap.to(card.rotation, {
+        y: Math.PI, duration: 0.38, ease: 'power2.inOut',
+        onComplete: () => { card.userData.flipping = false; },
+      });
+    }, 650);
+  }
+}
+
+function mgMfEnd() {
+  const totalPossible = DISHES.reduce((s, d) => s + d.ingredients.length, 0);
+  mgShowResult(
+    '🧠',
+    'Memory Flash',
+    `Rounds: <strong>${MG.mfTotalRounds}</strong><br>` +
+    `Ingredients recalled: <strong>${MG.mfCorrect}</strong><br>` +
+    `Score: <strong>${MG.score.toLocaleString()}</strong>`
+  );
+}
+
 // ─────────────────────────────────────────────
 // RENDER LOOP
 // ─────────────────────────────────────────────
@@ -2722,8 +2649,10 @@ function preloadEmoji() {
 // ─────────────────────────────────────────────
 // WEB AUDIO SOUND SYSTEM
 // ─────────────────────────────────────────────
-let _audioCtx = null;
+let _audioCtx   = null;
+let _masterGain = null;
 let _ambientGain = null;
+let _muted = false;
 
 function audioCtx() {
   if (!_audioCtx) {
@@ -2732,13 +2661,31 @@ function audioCtx() {
   return _audioCtx;
 }
 
+function getMasterGain() {
+  if (!_masterGain) {
+    const ctx = audioCtx();
+    _masterGain = ctx.createGain();
+    _masterGain.gain.value = _muted ? 0 : 1;
+    _masterGain.connect(ctx.destination);
+  }
+  return _masterGain;
+}
+
+function toggleMute() {
+  _muted = !_muted;
+  if (_masterGain) {
+    _masterGain.gain.setValueAtTime(_muted ? 0 : 1, audioCtx().currentTime);
+  }
+  document.getElementById('mute-btn').textContent = _muted ? '🔇' : '🔊';
+}
+
 function playTone(freq, dur, type = 'sine', vol = 0.22, delay = 0) {
   try {
     const ctx = audioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(getMasterGain());
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
     gain.gain.setValueAtTime(0, ctx.currentTime + delay);
@@ -2779,7 +2726,7 @@ function startAmbient() {
     const master = ctx.createGain();
     master.gain.setValueAtTime(0.0001, ctx.currentTime);
     master.gain.linearRampToValueAtTime(0.032, ctx.currentTime + 2);
-    master.connect(ctx.destination);
+    master.connect(getMasterGain());
     // Low warm drone: C2 + G2 + E3
     [65.41, 98.0, 164.81].forEach(freq => {
       const osc = ctx.createOscillator();
@@ -2810,9 +2757,9 @@ function stopAmbient() {
 // ─────────────────────────────────────────────
 
 // Expose to window for HTML onclick handlers (module scope is isolated)
-window.startGame     = startGame;
-window.nextRound     = nextRound;
-window.restartGame   = restartGame;
+window.toggleMute    = toggleMute;
+window.setDiff       = setDiff;
+window.backToMenu    = backToMenu;
 // Mini-game hub
 window.mgOpenHub     = mgOpenHub;
 window.mgBackToTitle = mgBackToTitle;
